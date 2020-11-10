@@ -45,30 +45,36 @@ dummy = Bot(other_controller)
 
 logger = melee.Logger()
 live_logger = LiveGameStats(onshutdown=kill, console=console)
-live_logger.add_command('c',
-    lambda: 'Controller: {}'.format(bot_controller.current))
-live_logger.add_command('left', lambda: bot_controller.tilt_analog(melee.enums.Button.BUTTON_MAIN, 0, 0.5))
-#live_logger.add_command('b', bot.toggle_debug)
-#live_logger.add_command('n', bot.to_next_strategy)
+for command, func in {
+        'c': lambda: str(bot_controller.current),   # str compares better for tracking
+        'release': lambda: bot_controller.release_all(),
+        # 'left': lambda: bot_controller.tilt_analog(melee.enums.Button.BUTTON_MAIN, 0, 0.5),
+        # 'l': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_L),
+        # 'r': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_R),
+        # 'A': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_A),
+        # 'start': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_START),
+        'inputs': lambda: 'Input queue: {}'.format(len(bot.queue)),
+        'laser': bot.set_standing_laser_strat,
+        'shlaser': bot.set_shorthop_laser_strat,
+        'jump': bot.jump,
+        'taunt': bot.taunt_asap,
+        'rage': bot.ragequit,
+        'j': lambda: bot.jumped,
+    }.items():
+    live_logger.add_command(command, func)
 
-#def control_bot_live():
-#    buttons = {
-#        'l': melee.enums.Button.BUTTON_L,
-#        'r': melee.enums.Button.BUTTON_R,
-#        'a': melee.enums.Button.BUTTON_A,
-#        'start': melee.enums.Button.BUTTON_START
-#    }
-#    for cmd, val in buttons.items():
-#        live_logger.add_command('press ' + cmd, lambda: bot_controller.press_button(val))
-#        live_logger.add_command('unpress ' + cmd, lambda: bot_controller.release_button(val))
-#
-#
-#    live_logger.add_command('release', bot_controller.release_all)
-#
-#    for cmd, func in live_logger.commands.items():
-#        print(cmd, '\t', func)
-#
-#control_bot_live()
+# live_logger.add_command('c', lambda: str(bot_controller.current))
+# live_logger.add_command('release', lambda: bot_controller.release_all())
+# live_logger.add_command('left', lambda: bot_controller.tilt_analog(melee.enums.Button.BUTTON_MAIN, 0, 0.5))
+# live_logger.add_command('l', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_L))
+# live_logger.add_command('r', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_R))
+# live_logger.add_command('a', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_A))
+# live_logger.add_command('start', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_START))
+# live_logger.add_command('taunt', bot.taunt)
+# live_logger.add_command('rage', bot.ragequit)
+# live_logger.add_command('b', lambda: len(bot.sequence))
+
+live_logger.start()
 
 ### main loop
 

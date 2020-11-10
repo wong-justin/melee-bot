@@ -18,11 +18,11 @@ class LiveInputsThread(threading.Thread):
         self.commands = {}
         for command, func in commands.items():
             self.add_command(command, func)
-        self.commands['h'] = self.help
+        self.commands['help'] = self.help
         self.stops = ('q', 'quit', 'kill', 'stop')
 
         super().__init__(name='input-thread')
-        self.start()
+        # self.start()
 
     def run(self):
         '''Start this thread waiting for user inputs, exiting if asked.'''
@@ -137,7 +137,7 @@ class LiveGameStats(LiveInputsThread):
             func = lambda: func(self.last_gamestat)
         super().add_command(command, self._continuous_wrapper(func))
 
-    ### some useful gamestate stats/properties/getters
+    ### some useful gamestate stats/properties/getters/formatters
 
     def _processing_time(self):
         return 'Max bot processing time: {:.2f} ms for a frame'.format(self.max_processing)
