@@ -294,7 +294,7 @@ class ControllableBot(InputsBot):
             'shlaser': Inputs.jump_n_laser,  #fastfall_laser_rand
             'taunt': Inputs.taunt,
             'shield': Inputs.shield,
-            'aa': lambda: [(Inputs.A,), (Inputs.un_A,)],
+            'A': lambda: [(Inputs.A,), (Inputs.un_A,)],
 
         }.items()}
 

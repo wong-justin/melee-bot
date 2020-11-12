@@ -46,7 +46,7 @@ dummy = Bot(other_controller)
 logger = melee.Logger()
 live_interface = LiveGameStats(onshutdown=kill, console=console, commands={
    'c': (lambda: str(bot_controller.current), 'controller state'),  # str compares better
-   'release': (lambda: bot_controller.release_all(), 'reset controller'),
+   'release': (lambda: bot_controller.release_all(), 'returns controller to neutral'),
    'inputs': (lambda: 'Input queue: {}'.format(len(bot.queue)), 'bot input queue'),
    'j': (lambda: bot.jumped, 'did bot jump?'),
    'laser': bot.set_standing_laser_strat,
