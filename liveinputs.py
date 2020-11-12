@@ -19,7 +19,7 @@ class LiveInputsThread(threading.Thread):
         for command, func in commands.items():
             self.add_command(command, func)
         self.commands['help'] = self.help
-        self.stops = ('q', 'quit', 'kill', 'stop')
+        self.stops = ('q', 'quit',)
 
         super().__init__(name='input-thread')
         # self.start()
@@ -27,6 +27,7 @@ class LiveInputsThread(threading.Thread):
     def run(self):
         '''Start this thread waiting for user inputs, exiting if asked.'''
         self.help()
+
         while True:
             _input = input()
             if _input in self.stops:

@@ -1,4 +1,4 @@
-from bot import FalcoBot, Bot
+from bot import FalcoBot, InputsBot, Bot
 from liveinputs import LiveGameStats
 import melee
 import argparse
@@ -44,37 +44,24 @@ bot = FalcoBot(bot_controller)
 dummy = Bot(other_controller)
 
 logger = melee.Logger()
-live_logger = LiveGameStats(onshutdown=kill, console=console)
+live_interface = LiveGameStats(onshutdown=kill, console=console)
 for command, func in {
         'c': lambda: str(bot_controller.current),   # str compares better for tracking
         'release': lambda: bot_controller.release_all(),
-        # 'left': lambda: bot_controller.tilt_analog(melee.enums.Button.BUTTON_MAIN, 0, 0.5),
-        # 'l': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_L),
-        # 'r': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_R),
-        # 'A': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_A),
-        # 'start': lambda: bot_controller.press_button(melee.enums.Button.BUTTON_START),
         'inputs': lambda: 'Input queue: {}'.format(len(bot.queue)),
         'laser': bot.set_standing_laser_strat,
         'shlaser': bot.set_shorthop_laser_strat,
         'jump': bot.jump,
-        'taunt': bot.taunt_asap,
+        'taunt': bot.taunt,
         'rage': bot.ragequit,
         'j': lambda: bot.jumped,
     }.items():
-    live_logger.add_command(command, func)
+    live_interface.add_command(command, func)
 
-# live_logger.add_command('c', lambda: str(bot_controller.current))
-# live_logger.add_command('release', lambda: bot_controller.release_all())
-# live_logger.add_command('left', lambda: bot_controller.tilt_analog(melee.enums.Button.BUTTON_MAIN, 0, 0.5))
-# live_logger.add_command('l', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_L))
-# live_logger.add_command('r', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_R))
-# live_logger.add_command('a', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_A))
-# live_logger.add_command('start', lambda: bot_controller.press_button(melee.enums.Button.BUTTON_START))
-# live_logger.add_command('taunt', bot.taunt)
-# live_logger.add_command('rage', bot.ragequit)
-# live_logger.add_command('b', lambda: len(bot.sequence))
+# for command, func in bot.commands.items():
+#     live_interface.add_command(command, func)
 
-live_logger.start()
+live_interface.start()
 
 ### main loop
 
@@ -86,7 +73,7 @@ while True:
     dummy.act(gamestate)
     bot.act(gamestate)
 
-    live_logger.update(gamestate)
+    live_interface.update(gamestate)
     logger.logframe(gamestate)
     logger.log('Frame Process Time', console.processingtime)   # ms
     logger.writeframe()

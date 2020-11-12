@@ -1,6 +1,7 @@
 import melee
 import random
 import time
+import inputs as Inputs
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
@@ -48,62 +49,29 @@ def always(gamestate):
 def never(gamestate):
     return False
 
-class CheckingBot(Bot):
-    '''Adds inputs queue and condition checker to main loop.
+class InputsBot(Bot):
+    '''Adds inputs queue to main loop.
 
     Inputs should be always put into queue,
     never called directly/instantly with controller.
-    First input will happen same frame of queueing.
+    First queued input will happen same frame of queueing.'''
 
-    Condition functions (self.when) take a gamestate parameter.
-    Callbacks (self.do) take no parameters.
-    Set self.when again in self.do in order to loop strategy,
-    otherwise self.when stops checking.'''
-
-    def __init__(self, controller,
-                 character=melee.Character.FOX,
-                 stage=melee.Stage.FINAL_DESTINATION):
-        super().__init__(controller=controller,
-                         character=character,
-                         stage=stage)
-
-        self.when = never
-        self.do = lambda:None
-        self.queue = []     # perhaps use a smarter/slightly more efficent type (like a real queue)?
-        self.max_time = 30  # arbitrary init
-        self.timer = self.max_time
+    def __init__(self, controller, character, stage):
+        super().__init__(controller, character, stage)
+        self.queue = []
 
     def play_frame(self, gamestate):
 
         # a fix for leftover menu presses
-        if gamestate.frame < 0:
-            self.queue = [(release_all,)]
-            return
-
-        self.check(gamestate)
+        # if gamestate.frame < 0:
+        #     self.queue = [(Inputs.release,)]
+        #     return
+        self.check_frame(gamestate)
         self.consume_next_inputs()
 
-    def check(self, gamestate):
-        '''Called each frame to check gamestate (and/or possibly self?) for condition,
-        stopping check when True.'''
-        if self.when(gamestate):
-            self.when = never
-            self.do()
-
     def consume_next_inputs(self):
-        '''Called each frame to press or release queued buttons.
-        (True, btn, x, y)   tilt_analog
-        (True, btn)         press_btn
-        (False, btn)        release_btn
-        (False,)            release_all
-        []                  no inputs this frame
-        Queue example:
-        >>> self.queue = [
-            ((True, Buttons.BUTTON_MAIN, 0.5, 0), (True, Buttons.BUTTON_B)),    # down+b same frame
-            [],                             # wait a frame
-            ((True, Buttons.BUTTON_Y),),    # jump input
-            ((False,),)                     # everything back to default
-        ]'''
+        '''Called each frame to press or release next buttons in queue.
+        See inputs.py for expected inputs format.'''
         if self.queue:
             commands = self.queue.pop(0)
             for press, *button_args in commands:
@@ -117,6 +85,41 @@ class CheckingBot(Bot):
                             self.controller.release_button(*button_args)
                         else:
                             self.controller.release_all()
+
+    def perform(self, input_sequence):
+        '''Set queue to a sequence of inputs.
+        Useful in lambdas where assignment is not allowed'''
+        self.queue = list(input_sequence)  # need a (deep) copy of fragile variable
+
+    def check_frame(self, gamestate):
+        '''Decision making and input queueing happens here.'''
+        pass
+
+class CheckBot(InputsBot):
+    '''Adds condition checker to main loop.
+
+    Condition functions (self.when) take a gamestate parameter.
+    Callbacks (self.do) take no parameters.
+    Stops checking upon reaching condition.'''
+
+    def __init__(self, controller,
+                 character=melee.Character.FOX,
+                 stage=melee.Stage.FINAL_DESTINATION):
+        super().__init__(controller=controller,
+                         character=character,
+                         stage=stage)
+
+        self.when = never
+        self.do = lambda:None
+        self.max_time = 30  # arbitrary init
+        self.timer = self.max_time
+
+    def check_frame(self, gamestate):
+        '''Called each frame to check gamestate (and/or possibly self?) for condition,
+        stopping check when True.'''
+        if self.when(gamestate):
+            self.when = never
+            self.do()
 
     def times_up(self, gamestate):
         '''A condition check that ticks timer, returning True on expire.'''
@@ -151,11 +154,6 @@ class CheckingBot(Bot):
         '''A condition to loop inputs by returning True when queue is empty.'''
         return len(self.queue) == 0
 
-    def perform(self, inputs):
-        '''Set queue to a sequence of inputs.
-        Useful in lambdas where assignment is not allowed'''
-        self.queue = list(inputs)  # need a (deep) copy for module level objs
-
 # some gamestate conditions not needing self
 
 def not_lasering(gamestate):
@@ -169,7 +167,7 @@ def not_taunting(gamestate):
 def grounded(gamestate):
     return gamestate.player[2].on_ground
 
-class FalcoBot(CheckingBot):
+class FalcoBot(CheckBot):
     # working with previous features
 
     def __init__(self, controller):
@@ -182,7 +180,7 @@ class FalcoBot(CheckingBot):
         self.set_shorthop_laser_strat()
 
     def set_standing_laser_strat(self):
-        self.set_timer(2, lambda: self.perform(laser), repeat=True)
+        self.set_timer(2, lambda: self.perform(Inputs.laser()), repeat=True)
         # self.repeat(when=self.finished_inputs,
         #             do=lambda: self.perform(laser))
 
@@ -207,11 +205,11 @@ class FalcoBot(CheckingBot):
             return False
 
     def sh_laser(self):
-        self.perform([*wait(3), *fastfall_laser_rand()])
+        self.perform([*Inputs.wait(3), *Inputs.fastfall_laser_rand()])
         self.jumped = True
 
     def jump(self):
-        self.perform([*wait(3), *shorthop])
+        self.perform([*Inputs.wait(3), *Inputs.shorthop()])
         self.jumped = True
 
     ### example of finding out frame data
@@ -246,23 +244,17 @@ class FalcoBot(CheckingBot):
                     do=self.jump_with_wait)
 
     def jump_with_wait(self):
-        self.perform([*wait(self.prepause), *shorthop])
+        self.perform([*Inputs.wait(self.prepause), *Inputs.shorthop()])
 
     ### toxic demos, use responsibly
 
-    def taunt_asap(self):
+    def taunt(self):
         # interrupt activities to taunt asap.
         # keeps setting queue until taunting actually happens
 
         # self.last_when = self.when
         self.when = not_taunting
-        self.do = self.prep_taunt
-
-    def prep_taunt(self):
-        # self.max_time = 15  # taunting should be underway by then
-        # self.when = self.times_up
-        # self.do = lambda:self.set_strat(self.last_strategy)
-        self.perform(taunt)
+        self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])
 
     def ragequit(self): #, angry_misinput=True):
         # special pause case: frames not advanced in pause, so we have to
@@ -279,111 +271,70 @@ class FalcoBot(CheckingBot):
             self.controller.press_button(*button_args)
             time.sleep(0.01) # could be needed if incosistent timing?
 
-class MoreAdvancedBot(AdvancedBot):
-    # more than one check at a time
+class ControllableBot(InputsBot):
+    # easier to control externally, eg from live thread or perhaps a twitch chat!
 
-    def __init__(self, controller, character, stage):
+    def __init__(self, controller,
+                 character=melee.Character.FALCO,
+                 stage=melee.Stage.FINAL_DESTINATION):
         super().__init__(controller, character, stage)
+
+        self.queue = []     # perhaps use a smarter/slightly more efficent type (like a real queue)?
+        self.commands = self.init_commands()
+        self.curr_sequence = []
+
+    def init_commands(self):
+
+        def wrapper(make):
+            return lambda: self.set_curr_seq(make())
+
+        return {cmd: wrapper(make) for cmd, make in {
+            'laser': Inputs.laser,
+            'sh': Inputs.shorthop,
+            'shlaser': Inputs.jump_n_laser,  #fastfall_laser_rand
+            'taunt': Inputs.taunt,
+            'shield': Inputs.shield,
+            'aa': lambda: [(Inputs.A,), (Inputs.un_A,)],
+
+        }.items()}
+
+    def check_frame(self, gamestate):
+        '''Called each frame to check gamestate (and/or possibly self?)
+        and choose next actions.'''
+
+        # test inputs
+        if len(self.queue) == 0:
+            self.perform(self.curr_sequence)
+        # if self.timer == 0:
+        #     self.queue = Inputs.laser
+
+    def set_curr_seq(self, sequence):
+        self.curr_sequence = [(Inputs.release,), *sequence]
+
+class MultiCheckBot(InputsBot):
+
+    FINISH_NOW = 1
+    STOP_CHECKING = 2
+    KEEP_CHECKING = 3
+
+    def __init__(self, controller,
+                 character=melee.Character.FALCO,
+                 stage=melee.Stage.FINAL_DESTINATION):
+        super().__init__(controller, character, stage)
+
         self.checks = {}
-        self.timers = {}
 
-    def check(self):
-        for when, do in self.checks.items():
-            if when(self, gamestate):
-                del self.checks[when]
-                do()
+    def check_frame(self, gamestate):
+        remove = []
+        for condition, do in self.checks.items():
+            if condition(self, gamestate):
+                retval = do()
+                if retval == MultiCheckBot.FINISH_NOW:
+                    return
+                elif retval == MultiCheckBot.STOP_CHECKING:
+                    remove.append(condition)
+        for condition in remove:
+            del self.checks[condition]
 
-    def repeat(self, when, do):
-        def do_and_wait_again():
-            do()
-            self.checks[when] = do_and_wait_again
-        self.checks[when] = do_and_wait_again
-
-### INPUTS
-
-# convenience
-
-def wait(n):
-    '''Gives n frames of no inputs. Use * to unpack in sequence.
-    >>> inputs = [
-        ...,
-        *wait(42),
-        ...
-    ]'''
-    return [[]] * n
-    # return [[] for _ in range(n)]
-
-def repeat(n, *input_frames):
-    return [*input_frames] * n
-
-release_all = (False,)
-center = (True, Buttons.BUTTON_MAIN, 0.5, 0.5)
-down = (True, Buttons.BUTTON_MAIN, 0.5, 0)
-
-A = (True, Buttons.BUTTON_A)
-un_A = (False, Buttons.BUTTON_A)
-B = (True, Buttons.BUTTON_B)
-un_B = (False, Buttons.BUTTON_B)
-Y = (True, Buttons.BUTTON_Y)
-un_Y = (False, Buttons.BUTTON_Y)
-
-# sequences
-    # which would be faster,
-    #   make these all functions-
-    #       def f(): return [...inputs...]
-    #   or copy in class-
-    #       class ... def f(): self.queue = somedeepcopy(sequence_ref) ?
-    # i think first option
-
-laser = [
-    ((True, Buttons.BUTTON_B),),
-    ((False, Buttons.BUTTON_B),)
-]
-
-shorthop = [
-    ((True, Buttons.BUTTON_Y),),
-    # *wait(2),
-    ((False, Buttons.BUTTON_Y),),
-]
-
-fastfall = [
-    (down,),
-    (center,),
-]
-
-jump_n_laser = [
-    ((True, Buttons.BUTTON_Y),),
-    ((False, Buttons.BUTTON_Y),),
-    *wait(5),
-    ((True, Buttons.BUTTON_B),),
-    ((False, Buttons.BUTTON_B),),
-]
-
-fastfall_laser = [
-    ((True, Buttons.BUTTON_Y),),
-    ((False, Buttons.BUTTON_Y),),
-    *wait(3),
-    ((True, Buttons.BUTTON_B),),
-    ((False, Buttons.BUTTON_B), (True, Buttons.BUTTON_MAIN, 0.5, 0),),
-    *wait(5),
-    (center,),
-]
-
-# crude
-def fastfall_laser_rand():
-    pre = random.randint(2,4)#10)
-    post = random.randint(1,5)
-    return [
-        *shorthop,
-        *repeat(pre, *fastfall),
-        (B,),
-        (un_B,),
-
-        *repeat(post, *fastfall),      # fastfall enough til ground; queue should be reset anyways
-        *wait(5),
-    ]
-
-taunt = [
-    ((True, Buttons.BUTTON_D_UP),),
-    ((False, Buttons.BUTTON_D_UP),)
-]
+    def something(self):
+        pass
