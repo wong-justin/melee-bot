@@ -1,77 +1,90 @@
 import threading
 from melee import GameState
+import argparse
+
+def _separate(s):
+    # emulating sys.argv. doesnt yet care about quotes wrapping spaces.
+    return s.split(' ')
+
+def _toss_args(func):
+    # wrapper
+    return lambda args: func()
+
+def _print(func):
+    # wrapper
+    def f(*args):
+        result = func(*args)
+        if result:  # falsy values too ugly/unimportant, not worth a print
+            print(result)
+        return result
+    return f
+
+BREAK_FLAG = -2
 
 class LiveInputsThread(threading.Thread):
-    '''Awaits user input to invoke functions live, eg to get live information
-    or dynamically change gameplay.
-    Used for debugging or poking around.
-    No data saved to file (as opposed to melee.logger).
-    Call self.help() for available commands.
+    '''Invoke functions live in shell session. Acts like a command line parser.
+    Used for live debugging or injecting commands to gameplay.
 
     Ex:
-    >>> live_thread.add_command('connect', bot.connect_to)
-    >>> ...init + start game, this thread waiting...
-    >>> connect PLUP#123'''
+    live_thread = LiveInputsThread(     # init before starting game
+        onshutdown=stop_everything,
+        commands={
+            'a', controller.press_a,
+            'move', lambda d: bot.move(d)
+            'status', lambda: print(bot.status),
+            'connect', lambda code: bot.direct_connect(code),
+        })
+    >>> ...game loop started, this thread waiting...
+    >>> connect PLUP#123
+    >>> move 10'''
 
     def __init__(self, onshutdown, commands={}):
-        self.onshutdown = onshutdown    # callback
-        self.commands = {}
-        for command, func in commands.items():
-            self.add_command(command, func)
-        self.commands['help'] = self.help
-        self.stops = ('q', 'quit',)
+        '''Creates parser with given commands and starts thread awaiting input.'''
+        parser = argparse.ArgumentParser(prog='',           # program name would distract
+                                         description='Perform commands during gameplay.',
+                                         add_help=False)    # we have custom help arg, not "-help"
+        meta_commands = {
+            'help': parser.print_help,
+            'quit': lambda: BREAK_FLAG
+        }
+        # add commands as subparsers so they're recognized simply as given
+        #   (positional args, no "-" flag symbol needed)
+        subparsers = parser.add_subparsers()    # obj for adding subparsers
+        for command, func in {**commands, **meta_commands}.items():
+            cmd_parser = subparsers.add_parser(command,
+                                               help='help for ' + command,
+                                               add_help=False)
+            cmd_parser.set_defaults(func=_toss_args(func))
 
+        self.parser = parser
+        self.onshutdown = onshutdown    # callback
         super().__init__(name='input-thread')
-        # self.start()
+        self.start()
 
     def run(self):
-        '''Start this thread waiting for user inputs, exiting if asked.'''
-        self.help()
+        '''Start this thread waiting for user inputs, exiting program if asked.'''
+        self.parser.print_help()
 
-        while True:
-            _input = input()
-            if _input in self.stops:
-                break
-            self._on_input(_input)
+        while True: # wait for next input
+            try:
+                args = self.parser.parse_args(args=_separate(input()))
+                # print(vars(args))#
+
+                # perform commands
+                if args.func(args) == BREAK_FLAG:
+                    print('Stopping thread...')
+                    break
+
+            except SystemExit:  # thrown whenever parser doesn't accept input
+                continue        # try again
+
         self.onshutdown()
-
-    def _on_input(self, _input):
-        '''Calls associated function, passing any options as args.'''
-        command, options = LiveInputsThread._parse_input(_input)
-        if command in self.commands:
-            self.commands[command](*options)
-        else:
-            print('"{}" not recognized'.format(_input))
-
-    def _parse_input(_input):
-        '''Parses command-line-style args.'''
-        command, *options = _input.split(' ')
-        return command, [(o[1:] if o[0] == '-' else o)
-                         for o in options]    # remove "-"s
-
-    def _print_wrapper(func):
-        '''Resulting function will print and return result of func().'''
-        def f(*args):
-            result = func(*args)
-            if result:  # falsy values too ugly/unimportant, not worth a print
-                print(result)
-            return result
-        return f
-
-    def add_command(self, command, func):
-        '''Add custom command with function.
-        Func(*options) will be called when command entered.'''
-        self.commands[command] = LiveInputsThread._print_wrapper(func)
-
-    def help(self):
-        '''Display available commands.'''
-        print( 'Commands: {}'.format((*self.commands.keys(), *self.stops)) )
 
 class LiveGameStats(LiveInputsThread):
     '''Enhances LiveInputsThread by adding updating/tracking feature
     and incorporating stats from melee.GameState.'''
 
-    def __init__(self, onshutdown, console=None):
+    def __init__(self, onshutdown, console=None, commands={}):
         self.max_processing = -1    # a persistent/cumulative stat
         self.console = console      # for above
         self.last_gamestate = None  # will provide rest of the stats
@@ -79,7 +92,7 @@ class LiveGameStats(LiveInputsThread):
         self.tracker = None         # a function to check for updates
         self.tracked_last = None    # last tracker() value
 
-        commands = {k: self._continuous_wrapper(v) for k, v in {
+        new = {k: _print(v) for k, v in {
             't': self._processing_time,
             'f': self._frame_num,
             'p': self._percents,
@@ -90,7 +103,7 @@ class LiveGameStats(LiveInputsThread):
             's': self.stop_tracking
         }.items()}
 
-        super().__init__(onshutdown=onshutdown, commands=commands)
+        super().__init__(onshutdown=onshutdown, commands={**commands, **new})
 
     def _continuous_wrapper(self, func):
         '''Adds continuous flag to func.

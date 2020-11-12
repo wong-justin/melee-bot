@@ -44,24 +44,19 @@ bot = FalcoBot(bot_controller)
 dummy = Bot(other_controller)
 
 logger = melee.Logger()
-live_interface = LiveGameStats(onshutdown=kill, console=console)
-for command, func in {
-        'c': lambda: str(bot_controller.current),   # str compares better for tracking
-        'release': lambda: bot_controller.release_all(),
-        'inputs': lambda: 'Input queue: {}'.format(len(bot.queue)),
-        'laser': bot.set_standing_laser_strat,
-        'shlaser': bot.set_shorthop_laser_strat,
-        'jump': bot.jump,
-        'taunt': bot.taunt,
-        'rage': bot.ragequit,
-        'j': lambda: bot.jumped,
-    }.items():
-    live_interface.add_command(command, func)
-
-# for command, func in bot.commands.items():
-#     live_interface.add_command(command, func)
-
-live_interface.start()
+commands={
+   'c': lambda: str(bot_controller.current),   # str compares better for tracking
+   'release': lambda: bot_controller.release_all(),
+   'inputs': lambda: 'Input queue: {}'.format(len(bot.queue)),
+   'laser': bot.set_standing_laser_strat,
+   'shlaser': bot.set_shorthop_laser_strat,
+   'jump': bot.jump,
+   'taunt': bot.taunt,
+   'rage': bot.ragequit,
+   'j': lambda: bot.jumped,
+}
+live_interface = LiveGameStats(onshutdown=kill, console=console, commands=commands)
+# live_interface.start()
 
 ### main loop
 
