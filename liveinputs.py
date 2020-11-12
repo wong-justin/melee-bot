@@ -4,55 +4,84 @@ import argparse
 
 BREAK_FLAG = -2
 EXTRA_ARGS = 'extra_args'
-
-def _is_int(s):
-    # quick and dirty. I just trust that exposed user commands won't need floats or negs
-    return s.isdigit()
-
-def _pass_args(func):
-    # wrapper for accepting any args that were parsed
-    return lambda args: func(*getattr(args, EXTRA_ARGS))#, default=[]))
-    # def f(args_namespace):
-    #     args = getattr(args_namespace, EXTRA_ARGS)
-    #     func(*args)
-    # return f
+# CONTINUOUS_FLAG = 'continuous'
 
 class StoreExtraArgs(argparse.Action):
-    # purpose is to accept + store any function args without needing "-" flag.
+    # purpose is to allow/accept/store extra inputs as function args without needing "-" flag.
+    # ie. allow inputs like ">>> connect PLUP#123" or ">>> moveto 10 40"
     # extra args will later be passed to command as positional args.
+    # quirks/drawbacks:
+    #   - won't pass kwargs from user input to function; only positional args allowed.
+    #   - args come from string (raw user input separated on spaces),
+    #   so command functions taking these args need to parse types if str not desired (eg str -> int)
+    #   - args can't start with "-" (RIP negatives) (it triggers parser unrecognized flag)
 
     def __init__(self, **kwargs):
-        kwargs['nargs'] = '*'   # accept >= 0 args
+        kwargs['nargs'] = '*'   # accept 0 or more args
         super().__init__(**kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, EXTRA_ARGS, values)
         # setattr(namespace, EXTRA_ARGS, [v if not _is_int(v) else int(v) for v in values])   # try to convert ints
 
-def test_func(s):
-    s = 'Input string: ' + s
-    print(s)
+# def _is_int(s):
+#     # quick and dirty. I just trust that exposed user commands won't need floats or negs
+#     return s.isdigit()
+
+def _accept_any_args(func):
+    # wrapper for taking args that were parsed (if any)
+    return lambda args_namespace: func(*getattr(args_namespace, EXTRA_ARGS))#, default=[]))
+
+def _print(func):
+    # wrapper for printing result of a function.
+    def f(*args):
+        result = func(*args)
+        if result == None:   # printing None does not look nice
+            print('.')#done')# assure that function finished (or should we do nothing?)
+        else:
+            print(result)
+        return result
+    return f
 
 def _separate(s):
-    # emulating sys.argv. currently ignores quotes wrapping spaces.
+    # emulating sys.argv with raw input string. currently ignores quotes wrapping spaces.
     return s.split(' ')
 
+def _add_command(subparser_adder, command, details):
+    '''Adds command as subparsers/subcommands so it's recognized as given -
+    as positional args, no "-" flag symbol needed'''
+
+    func, descrip = _unpack(details)
+    cmd_parser = subparser_adder.add_parser(command,
+                                            help=descrip,
+                                            add_help=False)
+    cmd_parser.set_defaults(func=_print(_accept_any_args(func)))        # do the command (even with no args)
+    # cmd_parser.set_defaults(func=_accept_any_args(func)))        # do the command (even with no args)
+    cmd_parser.add_argument(EXTRA_ARGS, action=StoreExtraArgs)  # allow any extra inputs as args
+    # cmd_parser.add_argument('-c', action='store_true', dest=CONTINUOUS_FLAG)
+
 class LiveInputsThread(threading.Thread):
-    '''Invoke functions live in shell session. Similar to a command line parser.
+    '''Invoke functions live in shell session during gameplay.
+    Similar to a command line parser.
     Used for live debugging or injecting commands to gameplay.
+
+    Commands format: {'cmd': func} or better {'cmd': (func, 'descrip/directions')}
 
     Ex:
     live_thread = LiveInputsThread(     # init before starting game
         onshutdown=stop_everything,
         commands={
-            'a', controller.press_a,
-            'move', lambda d: bot.move(d)
-            'status', lambda: print(bot.status),
-            'connect', lambda code: bot.direct_connect(code),
+            'status': lambda: print(bot.status),
+            'connect': lambda code: bot.direct_connect(code),
+            'A': controller.press_a,
+            'move': (bot.move, 'move bot [n] units in forward direction'),
         })
     >>> ...game loop started, this thread waiting...
     >>> connect PLUP#123
-    >>> move 10'''
+    >>> moveto 10 40
+    >>> status
+    >>> ...
+    >>> quit'''
 
     def __init__(self, onshutdown, commands={}):
         '''Creates parser with given commands and starts thread awaiting input.'''
@@ -60,27 +89,20 @@ class LiveInputsThread(threading.Thread):
                                          description='Perform commands during gameplay.',
                                          add_help=False)    # we have custom help arg, not "-help"
         meta_commands = {
-            'test': (test_func, 'for testing purposes'),
-            'help': parser.print_help,
-            'quit': lambda: BREAK_FLAG
-        }
-        # add commands as subparsers so they're recognized simply as given
-        #   (positional args, no "-" flag symbol needed)
-        subparsers = parser.add_subparsers()    # obj for adding subparsers
+            'test': (lambda *s:'You typed {} arg(s): {}'.format(len(s), s), 'test [your] [strings] ...'),
+            'help': parser.print_help,  # ideally help and quit dont get wrapped in _print and _accept_args
+            'quit': lambda: BREAK_FLAG  # as happens in _add_commands
+        }                               # but oh well
+
+        subparser_adder = parser.add_subparsers()
         for command, details in {**commands, **meta_commands}.items():
-            # unpack if description is included
-            func, descrip = (details if type(details) is tuple else (details, ''))
-            cmd_parser = subparsers.add_parser(command,
-                                               help=descrip,
-                                               add_help=False)
-            cmd_parser.set_defaults(func=_pass_args(func))      # do the command (even with no args)
-            cmd_parser.add_argument(EXTRA_ARGS, action=StoreExtraArgs)  # take any extra args
-            # cmd_parser.add_argument('-c', action='store_true')  # continuous flag
+            _add_command(subparser_adder, command, details)
+            # type(self)._add_command(subparser_adder, command, details)   # allow subclassing?
 
         self.parser = parser
         self.onshutdown = onshutdown    # callback
         super().__init__(name='input-thread')
-        self.start()
+        self.start()    # save for caller to start when they want?
 
     def run(self):
         '''Start this thread waiting for user inputs, exiting program if asked.'''
@@ -89,129 +111,83 @@ class LiveInputsThread(threading.Thread):
         while True: # wait for next input
             try:
                 args = self.parser.parse_args(args=_separate(input()))
-                # print(vars(args))#
-
-                # perform commands
+                # perform command
                 if args.func(args) == BREAK_FLAG:
                     print('Stopping thread...')
                     break
 
-            # except KeyboardInterrupt:   # pass to eventually onshutdown, which I could just do here...
-            #     # break
-            #     self.onshutdown()
-            #     return
-            except SystemExit as e: # thrown whenever parser doesn't accept input
-                print(e)
+            except SystemExit as e: # thrown whenever parser doesn't like input
+                # print('Bad command:', e)
                 continue
             except TypeError as e:
                 print('Bad command args:', e)
                 continue
-            # except (Exception, EOFError) as e:   # thrown when ctrl-c interrupts input()
+            # thrown when ctrl-c interrupts hanging input() -
+            # except (KeyboardInterrupt, EOFError, Exception) as e:
             #     break
 
         self.onshutdown()
 
-def _print(func):
-    # wrapper for printing result of a function
-    def f(*args):
-        result = func(*args)
-        if result == None:   # nicer looking message replacement
-            print('done')
-        else:
-            print(result)
-        return result
-    return f
+def _unpack(details):
+    # completes (func, descrip) tuple if descrip not present.
+    # allows for shorter {cmd: func} usage.
+    # doesnt actually unpack but it sounds nice when used in context.
+    return (details if type(details) is tuple else (details, ''))
 
 class LiveGameStats(LiveInputsThread):
-    '''Enhances LiveInputsThread by adding updating/tracking feature
-    and incorporating stats from melee.GameState.'''
+    '''Enhances LiveInputsThread by incorporating stats from melee.GameState.'''
+    # and adding printing-on-change feature.'''
 
     def __init__(self, onshutdown, console=None, commands={}):
         self.max_processing = -1    # a persistent/cumulative stat
         self.console = console      # for above
         self.last_gamestate = None  # will provide rest of the stats
 
-        self.tracker = None         # a function to check for updates
-        self.tracked_last = None    # last tracker() value
+        stats = {cmd: ( self._with_gamestate(func), descrip)
+                 for cmd, (func, descrip) in {
+                    'f': (_frame_num, 'frame num'),
+                    'p': (_percents, 'percents'),
+                    'd': (_distance, 'distance'),
+                    'a': (_action_states, 'action states'),
+                    'g': (_gamestate, 'gamestate'),
+                    'm': (_menu, 'menu'),
+                 }.items()}
+        stats['t'] = (self._processing_time, 'processing time')   # doesn't need gamestate
 
-        new = {k: _print(v) for k, v in {
-            't': self._processing_time,
-            'f': self._frame_num,
-            'p': self._percents,
-            'd': self._distance,
-            'a': self._action_states,
-            'g': self._gamestate,
-            'm': self._menu,
-            's': self.stop_tracking
-        }.items()}
-
-        super().__init__(onshutdown=onshutdown, commands={**commands, **new})
-
-    def _continuous_wrapper(self, func):
-        '''Adds continuous flag to func.
-        Func must take 0 args.'''
-        def f(continuous=False):
-            if continuous:
-                self.set_tracker(func)
-            return func()
-        return f
+        super().__init__(onshutdown=onshutdown, commands={**commands, **stats})
 
     def update(self, gamestate):
         '''Call this each frame to update recent stats.'''
         self.last_gamestate = gamestate
 
-        # any cumulative stats
+        # update any cumulative stats
         if self.console:
             self.max_processing = max(self.max_processing, self.console.processingtime)
 
-        # any tracker update
-        if self.tracker:
-            curr = self.tracker()
-            if not curr == self.tracked_last:
-                print(curr)
-                self.tracked_last = curr
-
-    def set_tracker(self, func):
-        '''Set a function to keep printing on update.'''
-        self.tracker = func
-        self.tracked_last = None
-
-    def stop_tracking(self):
-        '''Don't print anything continuously.'''
-        print('Stopped tracking.')
-        self.tracker = None
-        self.tracked_last = None
-
-    def add_command(self, command, func, give_gamestat=False):
-        '''Add custom command, adding continuous functionality.
-        Gives gamestate obj if needed for a custom gamestat.
-        >>> this.add_gamestat_command('m',
-            lambda gamestate: 'Menu: {}'.format(gamestate.menu_state),
-            give_gamestat=True)'''
-
-        if give_gamestat:
-            func = lambda: func(self.last_gamestat)
-        super().add_command(command, self._continuous_wrapper(func))
-
-    ### some useful gamestate stats/properties/getters/formatters
+    def _with_gamestate(self, func):
+        # wrapper to pass last gamestate stored in self
+        return lambda: func(self.last_gamestate)
 
     def _processing_time(self):
+        # a cumulative stat stored in self
         return 'Max bot processing time: {:.2f} ms for a frame'.format(self.max_processing)
 
-    def _frame_num(self):
-        return 'Frame num: {}'.format(self.last_gamestate.frame)
+### some useful gamestate stats/properties/getters/formatters:
 
-    def _percents(self):
-        return 'Percents: {}%  {}%'.format(self.last_gamestate.player[1].percent,
-                                           self.last_gamestate.player[2].percent)
-    def _distance(self):
-        return 'Distance: {:4f}'.format(self.last_gamestate.distance)
+def _frame_num(gamestate):
+    return 'Frame num: {}'.format(gamestate.frame)
 
-    def _action_states(self):
-        return 'Action states: {}  {}'.format(self.last_gamestate.player[1].action,
-                                              self.last_gamestate.player[2].action)
-    def _gamestate(self):
-        return 'Gamestate: {}'.format(self.last_gamestate)
+def _percents(gamestate):
+    return 'Percents: {}%  {}%'.format(gamestate.player[1].percent,
+                                       gamestate.player[2].percent)
+def _distance(gamestate):
+    return 'Distance: {:4f}'.format(gamestate.distance)
 
-    def _menu(self):
-        return 'Menu: {}'.format(self.last_gamestate.menu_state)
+def _action_states(gamestate):
+    return 'Action states: {}  {}'.format(gamestate.player[1].action,
+                                          gamestate.player[2].action)
+def _gamestate(gamestate):
+    return 'Gamestate: {}'.format(gamestate)
+
+def _menu(gamestate):
+    return 'Menu: {}'.format(gamestate.menu_state)
