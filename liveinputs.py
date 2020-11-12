@@ -2,27 +2,43 @@ import threading
 from melee import GameState
 import argparse
 
+BREAK_FLAG = -2
+EXTRA_ARGS = 'extra_args'
+
+def _is_int(s):
+    # quick and dirty. I just trust that exposed user commands won't need floats or negs
+    return s.isdigit()
+
+def _pass_args(func):
+    # wrapper for accepting any args that were parsed
+    return lambda args: func(*getattr(args, EXTRA_ARGS))#, default=[]))
+    # def f(args_namespace):
+    #     args = getattr(args_namespace, EXTRA_ARGS)
+    #     func(*args)
+    # return f
+
+class StoreExtraArgs(argparse.Action):
+    # purpose is to accept + store any function args without needing "-" flag.
+    # extra args will later be passed to command as positional args.
+
+    def __init__(self, **kwargs):
+        kwargs['nargs'] = '*'   # accept >= 0 args
+        super().__init__(**kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, EXTRA_ARGS, values)
+        # setattr(namespace, EXTRA_ARGS, [v if not _is_int(v) else int(v) for v in values])   # try to convert ints
+
+def test_func(s):
+    s = 'Input string: ' + s
+    print(s)
+
 def _separate(s):
-    # emulating sys.argv. doesnt yet care about quotes wrapping spaces.
+    # emulating sys.argv. currently ignores quotes wrapping spaces.
     return s.split(' ')
 
-def _toss_args(func):
-    # wrapper
-    return lambda args: func()
-
-def _print(func):
-    # wrapper
-    def f(*args):
-        result = func(*args)
-        if result:  # falsy values too ugly/unimportant, not worth a print
-            print(result)
-        return result
-    return f
-
-BREAK_FLAG = -2
-
 class LiveInputsThread(threading.Thread):
-    '''Invoke functions live in shell session. Acts like a command line parser.
+    '''Invoke functions live in shell session. Similar to a command line parser.
     Used for live debugging or injecting commands to gameplay.
 
     Ex:
@@ -44,17 +60,22 @@ class LiveInputsThread(threading.Thread):
                                          description='Perform commands during gameplay.',
                                          add_help=False)    # we have custom help arg, not "-help"
         meta_commands = {
+            'test': (test_func, 'for testing purposes'),
             'help': parser.print_help,
             'quit': lambda: BREAK_FLAG
         }
         # add commands as subparsers so they're recognized simply as given
         #   (positional args, no "-" flag symbol needed)
         subparsers = parser.add_subparsers()    # obj for adding subparsers
-        for command, func in {**commands, **meta_commands}.items():
+        for command, details in {**commands, **meta_commands}.items():
+            # unpack if description is included
+            func, descrip = (details if type(details) is tuple else (details, ''))
             cmd_parser = subparsers.add_parser(command,
-                                               help='help for ' + command,
+                                               help=descrip,
                                                add_help=False)
-            cmd_parser.set_defaults(func=_toss_args(func))
+            cmd_parser.set_defaults(func=_pass_args(func))      # do the command (even with no args)
+            cmd_parser.add_argument(EXTRA_ARGS, action=StoreExtraArgs)  # take any extra args
+            # cmd_parser.add_argument('-c', action='store_true')  # continuous flag
 
         self.parser = parser
         self.onshutdown = onshutdown    # callback
@@ -75,10 +96,31 @@ class LiveInputsThread(threading.Thread):
                     print('Stopping thread...')
                     break
 
-            except SystemExit:  # thrown whenever parser doesn't accept input
-                continue        # try again
+            # except KeyboardInterrupt:   # pass to eventually onshutdown, which I could just do here...
+            #     # break
+            #     self.onshutdown()
+            #     return
+            except SystemExit as e: # thrown whenever parser doesn't accept input
+                print(e)
+                continue
+            except TypeError as e:
+                print('Bad command args:', e)
+                continue
+            # except (Exception, EOFError) as e:   # thrown when ctrl-c interrupts input()
+            #     break
 
         self.onshutdown()
+
+def _print(func):
+    # wrapper for printing result of a function
+    def f(*args):
+        result = func(*args)
+        if result == None:   # nicer looking message replacement
+            print('done')
+        else:
+            print(result)
+        return result
+    return f
 
 class LiveGameStats(LiveInputsThread):
     '''Enhances LiveInputsThread by adding updating/tracking feature
