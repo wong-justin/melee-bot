@@ -135,16 +135,17 @@ def _unpack(details):
     return (details if type(details) is tuple else (details, ''))
 
 class LiveGameStats(LiveInputsThread):
-    '''Enhances LiveInputsThread by incorporating stats from melee.GameState.'''
-    # and adding printing-on-change feature.'''
+    '''Enhances LiveInputsThread by incorporating stats from melee.GameState
+    and adding stat-tracking / printing-on-change feature.'''
 
     def __init__(self, onshutdown, commands={}, console=None):
         # init with console if you want a processing time stat
 
-        stats = {   # stats that don't need gamestate
+        stats = {   # don't need gamestate
+            'track': (lambda cmd: self._track(cmd), 'track updates to [cmd]'),
+            'notrack': (self._reset_tracker, 'stop tracking that'),
             'process': (self._processing_time, 'processing time'),
             'dur': (self._stock_duration, 'stock duration'),
-            # 'track': (lambda cmd: self.track(cmd), 'track [cmd]'),
         }
         stats.update({cmd: ( self._with_gamestate(func), descrip )
              for cmd, (func, descrip) in {
@@ -157,47 +158,70 @@ class LiveGameStats(LiveInputsThread):
                 'stocks': (_stocks, 'stocks')
              }.items()
         })
-        super().__init__(onshutdown=onshutdown, commands={**commands, **stats})
+        commands.update(stats)
+        self.commands = commands
+        super().__init__(onshutdown=onshutdown, commands=commands)
 
         # any persistent/cumulative stats
-        self.max_processing = 0     # ms
-        self.console = console      # for above
-        self.stock_duration = 0     # frames, ie 1/60th sec
-        self.stocks = 4             # tells when to reset above
-        self.last_gamestate = None  # will provide rest of the stats
+        self._max_processing = 0     # ms
+        self._console = console      # for above
+        self._stock_duration = 0     # frames, ie 1/60th sec
+        self._stocks = 4             # tells when to reset above
+        self._last_gamestate = None  # will provide rest of the stats
+
+        self._tracker = None        # callable, called each frame
+        self._tracked_last = None   # from above
 
     def _with_gamestate(self, func):
         # wrapper to pass last gamestate stored in self
-        return lambda: func(self.last_gamestate)
+        return lambda: func(self._last_gamestate)
 
     def update(self, gamestate):
         '''Call this each frame to update recent stats.'''
-        self.last_gamestate = gamestate
+        self._last_gamestate = gamestate
 
         # update any cumulative stats
         self._update_processing()
-        if 2 in gamestate.player:
+        if 2 in gamestate.player:   # game started
             self._update_stock_dur(gamestate)
+
+        if self._tracker:
+            curr = self._tracker()
+            if not curr == self._tracked_last:
+                self._tracked_last = curr
+                print(curr)
+
+    def _reset_tracker(self):
+        self._tracker = None
+        self._tracked_last = None
+
+    def _track(self, cmd):
+        # check cmd each frame for change. func must takes 0 args.
+        # if custom func needs gamestate, consider wrapping _with_gamestate(func)?
+        func, _ = _unpack(self.commands[cmd])
+        self._tracker = func
+
+    # for specific stats
 
     def _processing_time(self):
         # a cumulative stat stored in self
-        return 'Max bot processing time: {:.2f} ms for a frame'.format(self.max_processing)
+        return 'Max bot processing time: {:.2f} ms for a frame'.format(self._max_processing)
 
     def _update_processing(self):
-        if self.console:
-            self.max_processing = max(self.max_processing, self.console.processingtime)
+        if self._console:
+            self._max_processing = max(self._max_processing, self._console.processingtime)
 
     def _stock_duration(self):
         # a cumulative stat stored in self
-        return '{} sec into this stock'.format(self.stock_duration // 60)   # fps
+        return '{} sec into this stock'.format(self._stock_duration // 60)   # fps
 
     def _update_stock_dur(self, gamestate):
         curr_stocks = gamestate.player[2].stock
-        if not self.stocks == curr_stocks:
-            self.stocks = curr_stocks   # -= 1
-            self.stock_duration = 0
+        if not self._stocks == curr_stocks:
+            self._stocks = curr_stocks   # -= 1
+            self._stock_duration = 0
         else:
-            self.stock_duration += 1
+            self._stock_duration += 1
 
 ### some useful gamestate stats/properties/getters/formatters:
 
