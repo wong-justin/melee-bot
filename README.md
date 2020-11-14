@@ -1,26 +1,24 @@
 # melee-bot
 
-Implementing a SSBM smashbot with helpful features.
+An easier way to develop a SSBM bot. Enhances [libmelee](https://github.com/altf4/libmelee) experience.
+
+## Demo
+![Screen capture](./docs/demo.gif)
+
+## Features
+- Interact with gameplay: control bot, track stats, debug gamestates
+- Simple inputs framework to make button presses and sequences
+- Bot classes handle setup to let you focus on gameplay strategies
 
 ### Todo
 
-- [ ] Better logging on live inputs
-  - [ ] Descriptive help
-
 - [ ] Test on Linux, OSX
-
-Bot
-
-- [ ] Machine learning!
-  - [ ] sequences at a time
-  - [ ] situations
-
-Forking libmelee
-
-- [ ] add comparison and difference operators to ControllerState for debugging
-- [ ] add properties/descrips to GameState for debugging (move them out of live inputs class)
-
-### Misc notes
-
-- PlayerState.on_ground not working
-- LiveGameStats continuous stat prints twice on start
+- [ ] Generalize for other ports and online connection
+- [ ] Create command line options for starting the game
+eg. `-bot [class] -port [1] -bot [another] -port [2]`
+- [ ] Round out inputs.py
+- [ ] Make a semi-playable bot
+- [ ] Sidequest - train a bot with machine learning
+  - [ ] gather training dataset of replays
+  - [ ] learning inputs
+  - [ ] recognizing situations, eg. edgeguards
