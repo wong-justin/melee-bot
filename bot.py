@@ -41,8 +41,6 @@ class Bot:
         '''Bot game logic implemented here.'''
         pass
 
-# convenience/helpers/conditions that don't require self
-
 def always(gamestate):
     return True
 
@@ -73,23 +71,13 @@ class InputsBot(Bot):
         '''Called each frame to press or release next buttons in queue.
         See inputs.py for expected inputs format.'''
         if self.queue:
-            commands = self.queue.pop(0)
-            for press, *button_args in commands:
-                if len(button_args) > 1:
-                    self.controller.tilt_analog(*button_args)
-                else:
-                    if press:
-                        self.controller.press_button(*button_args)
-                    else:
-                        if button_args:
-                            self.controller.release_button(*button_args)
-                        else:
-                            self.controller.release_all()
+            inputs = self.queue.pop(0)
+            Inputs.make_inputs(inputs, self.controller)
 
     def perform(self, input_sequence):
         '''Set queue to a sequence of inputs.
         Useful in lambdas where assignment is not allowed'''
-        self.queue = list(input_sequence)  # need a (deep) copy of fragile variable
+        self.queue = list(input_sequence)  # need a (deep) copy for modifiable lists/tuples
 
     def check_frame(self, gamestate):
         '''Decision making and input queueing happens here.'''
@@ -271,70 +259,102 @@ class FalcoBot(CheckBot):
             self.controller.press_button(*button_args)
             time.sleep(0.01) # could be needed if incosistent timing?
 
+
+
 class ControllableBot(InputsBot):
-    # easier to control externally, eg from live thread or perhaps a twitch chat!
+    # designed to easily control externally in real time,
+    # eg. from live thread or perhaps a twitch chat!
 
     def __init__(self, controller,
                  character=melee.Character.FALCO,
                  stage=melee.Stage.FINAL_DESTINATION):
         super().__init__(controller, character, stage)
 
-        self.queue = []     # perhaps use a smarter/slightly more efficent type (like a real queue)?
-        self.commands = self.init_commands()
+        self.queue = []
+        self.commands = self._init_commands()
         self.curr_sequence = []
 
-    def init_commands(self):
+    def _init_commands(self):
 
-        def wrapper(make):
-            return lambda: self.set_curr_seq(make())
-
-        return {cmd: wrapper(make) for cmd, make in {
+        commands = {cmd: self._set_seq(make_seq) for cmd, make_seq in {
             'laser': Inputs.laser,
             'sh': Inputs.shorthop,
             'shlaser': Inputs.jump_n_laser,  #fastfall_laser_rand
             'taunt': Inputs.taunt,
             'shield': Inputs.shield,
-            'A': lambda: [(Inputs.A,), (Inputs.un_A,)],
-
+            'dd': Inputs.dashdance,
         }.items()}
+        commands.update({cmd: self._set_seq(_make_seq(btn)) for cmd, btn in {
+            'release': Inputs.release,
+            'center': Inputs.center,
+            'down': Inputs.down,
+            'up': Inputs.up,
+            'left': Inputs.left,
+            'right': Inputs.right,
+            'A': Inputs.A,
+            'B': Inputs.B,
+            'Y': Inputs.Y,
+            'L': Inputs.L
+        }.items()})
+        # commands.update({
+        #     'undo': self.release_last,
+        # })
+        return commands
+
+    def _set_seq(self, make_seq):
+        # wrapper to set current sequence to result of sequence maker func
+        return lambda: self.set_curr_seq(make_seq())
+
+    def set_curr_seq(self, inputs):
+        self.curr_sequence = inputs# [(Inputs.release,), *inputs]
+
+    def add_to_queue(self, inputs):
+        # add to any existing inputs (usually would replace them)
+        self.queue.extend(inputs)
 
     def check_frame(self, gamestate):
         '''Called each frame to check gamestate (and/or possibly self?)
         and choose next actions.'''
 
-        # test inputs
         if len(self.queue) == 0:
             self.perform(self.curr_sequence)
         # if self.timer == 0:
         #     self.queue = Inputs.laser
 
-    def set_curr_seq(self, sequence):
-        self.curr_sequence = [(Inputs.release,), *sequence]
-
-class MultiCheckBot(InputsBot):
-
-    FINISH_NOW = 1
-    STOP_CHECKING = 2
-    KEEP_CHECKING = 3
-
-    def __init__(self, controller,
-                 character=melee.Character.FALCO,
-                 stage=melee.Stage.FINAL_DESTINATION):
-        super().__init__(controller, character, stage)
-
-        self.checks = {}
-
-    def check_frame(self, gamestate):
-        remove = []
-        for condition, do in self.checks.items():
-            if condition(self, gamestate):
-                retval = do()
-                if retval == MultiCheckBot.FINISH_NOW:
-                    return
-                elif retval == MultiCheckBot.STOP_CHECKING:
-                    remove.append(condition)
-        for condition in remove:
-            del self.checks[condition]
-
     def something(self):
         pass
+
+def _make_seq(button):
+    # wrapper to put single button press into a sequence
+    return lambda: [(button,),]
+
+
+# under construction:
+
+# class MultiCheckBot(InputsBot):
+#
+#     FINISH_NOW = 1
+#     STOP_CHECKING = 2
+#     KEEP_CHECKING = 3
+#
+#     def __init__(self, controller,
+#                  character=melee.Character.FALCO,
+#                  stage=melee.Stage.FINAL_DESTINATION):
+#         super().__init__(controller, character, stage)
+#
+#         self.checks = {}
+#
+#     def check_frame(self, gamestate):
+#         remove = []
+#         for condition, do in self.checks.items():
+#             if condition(self, gamestate):
+#                 retval = do()
+#                 if retval == MultiCheckBot.FINISH_NOW:
+#                     return
+#                 elif retval == MultiCheckBot.STOP_CHECKING:
+#                     remove.append(condition)
+#         for condition in remove:
+#             del self.checks[condition]
+#
+#     def something(self):
+#         pass

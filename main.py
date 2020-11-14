@@ -1,9 +1,10 @@
-from bot import FalcoBot, InputsBot, Bot
+from bot import FalcoBot, InputsBot, ControllableBot, Bot
 from liveinputs import LiveGameStats
 import melee
 import argparse
 import signal
 import sys
+from patches import _Controller
 
 ### command line starts everything
 
@@ -40,20 +41,15 @@ def kill():
 
 signal.signal(signal.SIGINT, lambda sig, frame: kill())  # on ctrl-c interrupt
 
-bot = FalcoBot(bot_controller)
+# bot = FalcoBot(bot_controller)
+bot = ControllableBot(bot_controller)
 dummy = Bot(other_controller)
 
 logger = melee.Logger()
 live_interface = LiveGameStats(onshutdown=kill, console=console, commands={
-   'c': (lambda: str(bot_controller.current), 'controller state'),  # str compares better
-   'release': (lambda: bot_controller.release_all(), 'returns controller to neutral'),
+   'c': (lambda: _Controller(bot_controller.current), 'controller state'),  # str compares better
    'inputs': (lambda: 'Input queue: {}'.format(len(bot.queue)), 'bot input queue'),
-   'j': (lambda: bot.jumped, 'did bot jump?'),
-   'laser': bot.set_standing_laser_strat,
-   'shlaser': bot.set_shorthop_laser_strat,
-   'jump': bot.jump,
-   'taunt': bot.taunt,
-   'rage': bot.ragequit,
+   **bot.commands,
 })
 
 ### main loop

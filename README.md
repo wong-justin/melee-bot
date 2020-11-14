@@ -7,6 +7,8 @@ Implementing a SSBM smashbot with helpful features.
 - [ ] Better logging on live inputs
   - [ ] Descriptive help
 
+- [ ] Test on Linux, OSX
+
 Bot
 
 - [ ] Machine learning!
