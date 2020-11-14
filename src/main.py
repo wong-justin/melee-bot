@@ -46,9 +46,9 @@ dummy = Bot(other_controller)
 
 logger = melee.Logger()
 live_interface = LiveGameStats(onshutdown=kill, console=console, commands={
-   'c': (lambda: _Controller(bot_controller.current), 'controller state'),  # str compares better
-   'inputs': (lambda: 'Input queue: {}'.format(len(bot.queue)), 'bot input queue'),
-   **bot.commands,
+    **bot.commands,
+    'c': (lambda: _Controller(bot_controller.current), 'controller state'),  # str compares better
+    'inputs': (lambda: 'Input queue: {}'.format(len(bot.queue)), 'bot input queue'),
 })
 
 ### main loop

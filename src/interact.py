@@ -6,62 +6,6 @@ BREAK_FLAG = -2
 EXTRA_ARGS = 'extra_args'
 # CONTINUOUS_FLAG = 'continuous'
 
-class StoreExtraArgs(argparse.Action):
-    '''Purpose is to store any extra inputs beyond initial command
-    as function args without needing any "-" flags.
-    Allows inputs like:
-    >>> connect PLUP#123 or >>> moveto 10 40
-    as opposed to default parser behavior:
-    >>> connect -specific_flag PLUP#123 or >>> moveto -other_flag 10 40
-
-    Extra args will later be passed to command as positional args
-    eg. >>> cmd a b 10   ->   func_for_cmd('a','b','10')
-    Quirks/drawbacks to this style/implementation:
-      - no kwargs allowed (too messy to implement anyways); only positional args.
-      - args can't start with "-" (RIP negatives) (it triggers parser unrecognized flag)
-      - args come from string (raw user input separated on spaces),
-      so command functions taking these args need to parse strs (eg str -> int)
-      - no helpful parser checking/catching/help messages on error for these extra args
-      (throws type errors or other) (as opposed to intended parser use, like on initial commands)'''
-
-    def __init__(self, **kwargs):
-        kwargs['nargs'] = '*'   # accept 0 or more args
-        super().__init__(**kwargs)
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, EXTRA_ARGS, values)
-
-def _accept_any_args(func):
-    # wrapper for taking args that were parsed (if any)
-    return lambda args_namespace: func(*getattr(args_namespace, EXTRA_ARGS))#, default=[]))
-
-def _print(func):
-    # wrapper for printing before returning result of a function.
-    def f(*args):
-        result = func(*args)
-        if result == None:   # printing None does not look nice
-            print('.')#done')# assure that function finished (or should we do nothing?)
-        else:
-            print(result)
-        return result
-    return f
-
-def _separate(s):
-    # emulating sys.argv with raw input string. currently ignores quotes wrapping spaces.
-    return s.split(' ')
-
-def _add_command(subparser_adder, command, details):
-    '''Adds command as subparser/subcommand sharing first input position.
-    Subcommands won't need "-" flag symbol.'''
-
-    func, descrip = _unpack(details)
-    cmd_parser = subparser_adder.add_parser(command,
-                                            help=descrip,
-                                            add_help=False)
-    cmd_parser.set_defaults(func=_print(_accept_any_args(func)))    # set the command
-    # cmd_parser.set_defaults(func=_accept_any_args(func)))
-    cmd_parser.add_argument(EXTRA_ARGS, action=StoreExtraArgs)  # allow any extra inputs as args
-
 class LiveInputsThread(threading.Thread):
     '''Invoke functions in a shell session during gameplay.
     Similar to a command line parser but streamlined experience, no flags.
@@ -81,7 +25,7 @@ class LiveInputsThread(threading.Thread):
             'seq': (bot.loop_inputs, 'repeat custom inputs '\
                 '... [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
         })
-    [...game loop started, this thread waiting...]
+    [...this thread is waiting and game loop is started...]
     >>> connect PLUP#123
     >>> moveto 10 40
     >>> status
@@ -95,10 +39,10 @@ class LiveInputsThread(threading.Thread):
                                          description='Perform commands during gameplay.',
                                          add_help=False)    # we have custom help arg, not "-help"
         meta_commands = {
-            'test': (lambda *s:'You typed {} arg(s): {}'.format(len(s), s), 'test [your] [strings] [...]'),
+            'test': (lambda *s:'You typed {} arg(s): {}'.format(len(s), s), 'test [your [strings ...]]'),
             'help': parser.print_help,  # ideally help and quit dont get wrapped in _print and _accept_args
-            'quit': lambda: BREAK_FLAG  # as happens in _add_commands
-        }                               # but oh well
+            'quit': lambda: BREAK_FLAG  #   when it happens in _add_commands
+        }                               #   but oh well
 
         subparser_adder = parser.add_subparsers()
         for command, details in {**commands, **meta_commands}.items():
@@ -108,7 +52,7 @@ class LiveInputsThread(threading.Thread):
         self.parser = parser
         self.onshutdown = onshutdown    # callable
         super().__init__(name='input-thread')
-        self.start()    # save for caller to start when they want?
+        self.start()    # maybe save for caller to start when they want?
 
     def run(self):
         '''Start this thread waiting for user inputs, exiting program if asked.'''
@@ -126,7 +70,7 @@ class LiveInputsThread(threading.Thread):
                 # print('Bad command:', e)
                 continue
             except TypeError as e:
-                print('Bad command args:', e)
+                print('Bad command extra args:', e)
                 continue
             # thrown when ctrl-c interrupts hanging input() -
             # except (KeyboardInterrupt, EOFError, Exception) as e:
@@ -134,11 +78,70 @@ class LiveInputsThread(threading.Thread):
 
         self.onshutdown()
 
+###  helpers for LiveInputsThread
+
+class StoreExtraArgs(argparse.Action):
+    '''Purpose is to store any extra inputs beyond initial command
+    as function args without needing any flags.
+    This action allows inputs like:
+    >>> connect PLUP#123 or >>> moveto 10 40
+    as opposed to default parser behavior:
+    >>> connect -specific_flag PLUP#123 or >>> moveto -other_flag 10 40
+
+    Extra args will later be passed to command as positional args
+    eg. >>> cmd a b 10   ->   func_for_cmd('a','b','10')
+    Quirks/drawbacks to this style/implementation:
+      - no kwargs allowed (too messy to implement anyways); only positional args.
+      - args can't start with "-" (RIP negatives) (it triggers parser unrecognized flag)
+      - args come from string (raw user input separated on spaces),
+      so command functions taking these args need to parse strs (eg str -> int)
+      - no helpful parser checking/catching/help messages on error for these extra args
+      (throws type errors or other) (as opposed to intended parser usage giving help)'''
+
+    def __init__(self, **kwargs):
+        kwargs['nargs'] = '*'   # accept 0 or more args
+        super().__init__(**kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, EXTRA_ARGS, values)
+
+def _add_command(subparser_adder, command, details):
+    '''Adds command as subparser/subcommand sharing first input position.
+    Subcommands won't need "-" option symbol.'''
+
+    func, descrip = _unpack(details)
+    cmd_parser = subparser_adder.add_parser(command,
+                                            help=descrip,
+                                            add_help=False)
+    cmd_parser.set_defaults(func=_print(_accept_any_args(func)))    # set the command
+    cmd_parser.add_argument(EXTRA_ARGS, action=StoreExtraArgs)  # allow any extra inputs as args
+
+def _accept_any_args(func):
+    # wrapper for taking any args that were parsed
+    return lambda args_namespace: func(*getattr(args_namespace, EXTRA_ARGS))#, default=[]))
+
 def _unpack(details):
     # completes (func, descrip) if descrip not present in details tuple.
-    # amends short command {cmd: func} in commands dict.
+    # covers short command {cmd: func} in commands dict.
     # doesnt technically unpack here but it sounds nice when used in context.
     return (details if type(details) is tuple else (details, ''))
+
+def _print(func):
+    # wrapper for printing before returning result of a function.
+    def f(*args):
+        result = func(*args)
+        if result == None:   # printing None does not look nice
+            print('.')#done')# assure that function finished (or should we do nothing?)
+        else:
+            print(result)
+        return result
+    return f
+
+def _separate(s):
+    # emulating sys.argv with raw input string. currently ignores quotes wrapping spaces.
+    return s.split(' ')
+
+### extending LiveInputsThread with more features
 
 class LiveGameStats(LiveInputsThread):
     '''Enhances LiveInputsThread by incorporating stats from melee.GameState
@@ -156,13 +159,7 @@ class LiveGameStats(LiveInputsThread):
     def __init__(self, onshutdown, commands={}, console=None):
         # init with console if you want a processing time stat
 
-        stats = {   # don't need gamestate
-            'track': (self._track, 'print updates to [cmd]'),
-            'untrack': (self._reset_tracker, 'stop tracking that'),
-            'process': (self._processing_time, 'processing time'),
-            'dur': (self._stock_duration, 'this stock duration'),
-        }
-        stats.update({cmd: ( self._with_gamestate(func), descrip )
+        stats = {cmd: ( self._with_gamestate(func), descrip )
              for cmd, (func, descrip) in {
                 'f': (_Gamestat.frame_num, 'frame num'),
                 'p': (_Gamestat.percents, 'percents'),
@@ -172,6 +169,12 @@ class LiveGameStats(LiveInputsThread):
                 'm': (_Gamestat.menu, 'menu'),
                 'stocks': (_Gamestat.stocks, 'stocks'),
              }.items()
+        }
+        stats.update({   # don't need gamestate
+            'process': (self._processing_time, 'processing time'),
+            'dur': (self._stock_duration, 'this stock duration'),
+            'track': (self._track, 'print [cmd] on updates'),
+            'no': (self._reset_tracker, 'stop tracking'),
         })
         commands.update(stats)
         self.commands = commands
@@ -206,15 +209,15 @@ class LiveGameStats(LiveInputsThread):
                 self._tracked_last = curr
                 print(curr)
 
-    def _reset_tracker(self):
-        self._tracker = None
-        self._tracked_last = None
-
     def _track(self, cmd):
         # check cmd func each frame for change. func must takes 0 args.
         # if custom func needs gamestate, consider wrapping _with_gamestate(func)?
         func, _ = _unpack(self.commands[cmd])
         self._tracker = func
+
+    def _reset_tracker(self):
+        self._tracker = None
+        self._tracked_last = None
 
     # for specific stats
 

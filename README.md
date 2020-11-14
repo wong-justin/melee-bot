@@ -3,7 +3,7 @@
 An easier way to develop a SSBM bot. Enhances [libmelee](https://github.com/altf4/libmelee) experience.
 
 ## Demo
-![Screen capture](./docs/demo.gif)
+![Screen capture](./demo/demo.gif)
 
 ## Features
 - Interact with gameplay: control bot, track stats, debug gamestates

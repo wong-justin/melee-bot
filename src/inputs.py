@@ -39,7 +39,7 @@ def make_inputs(inputs, controller):
                     controller.release_all()
     # []  frame of nothing
 
-def invert_press(_input):
+def inverse(_input):
     if len(_input) < 2:
         return _input   # can't invert wait or release_all
     else:
@@ -82,13 +82,19 @@ left = (True, Button.BUTTON_MAIN, 0, 0.5)
 right = (True, Button.BUTTON_MAIN, 1, 0.5)
 
 A = (True, Button.BUTTON_A)
-un_A = (False, Button.BUTTON_A)
 B = (True, Button.BUTTON_B)
-un_B = (False, Button.BUTTON_B)
+X = (True, Button.BUTTON_X)
 Y = (True, Button.BUTTON_Y)
-un_Y = (False, Button.BUTTON_Y)
 L = (True, Button.BUTTON_L)
-un_L = (False, Button.BUTTON_L)
+R = (True, Button.BUTTON_R)
+
+taunt = (True, Button.BUTTON_D_UP)
+
+# un_A = (False, Button.BUTTON_A)
+# un_B = (False, Button.BUTTON_B)
+# un_Y = (False, Button.BUTTON_Y)
+# un_L = (False, Button.BUTTON_L)
+
 
 ### sequences
 
@@ -144,7 +150,7 @@ def fastfall_laser_rand():
 
 def taunt():
     return [
-        ((True, Button.BUTTON_D_UP),),
+        (taunt,),
         ((False, Button.BUTTON_D_UP),)
     ]
 
