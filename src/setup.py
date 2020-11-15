@@ -3,13 +3,16 @@ import melee
 from interact import LiveGameStats
 
 def start_game(ports, live_interface=LiveGameStats(), log=True):
-    # ports: 4-tuple containing either bot instances or Nones
-    #   eg. (None, SomeBot(), None, None)
-    # live_interface:
-    #   ignore to take default,
-    #   LiveInputsThread obj with custom commands,
-    #   None if no live thread desired (probably for performance)
-    # log: write game logs to file if True
+    '''Main method to fully start game.
+    command-line parser first needs dolphin folder path, then...
+
+    ports: 4-tuple containing either bot instances or Nones
+      eg. (None, SomeBot(), None, None)
+    live_interface:
+      ignore to take default,
+      LiveInputsThread obj with custom commands,
+      None if no live thread desired (probably for performance)
+    log: write game logs to file if True'''
 
     args = _start_command_line()
     console = melee.Console(path=args.path)
@@ -49,6 +52,7 @@ def _start_command_line():
     return parser.parse_args()
 
 def _assign_controllers(ports, console):
+    # make + give controllers to any bots present in 4-tuple of ports
     bots = []
     for port, bot in enumerate(ports):
         if bot:

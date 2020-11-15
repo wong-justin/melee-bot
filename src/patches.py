@@ -3,7 +3,7 @@
 from melee import ControllerState, Button, Menu
 
 class _Controller(ControllerState):
-    '''new controller state class with comparisons and smaller debug output.
+    '''Extending ControllerState with comparisons and smaller debug output.
 
     >>> comparable_controller = _Controller(real_controller.current)'''
 
@@ -45,7 +45,7 @@ class _Controller(ControllerState):
         return self.active() - other.active()
 
 class _Gamestat:
-    '''Group of functions for helpful stats, given melee.Gamestate.
+    '''Group of functions returning helpful stats, given melee.Gamestate.
     These would be nice properties implemented in that class.
     Mostly pretty printing.
 

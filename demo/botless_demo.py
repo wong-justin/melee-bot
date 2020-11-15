@@ -1,23 +1,17 @@
-'''Botless use of LiveInputsThread acting as a hook to trigger
-when something happens in game.'''
+'''Using LiveInputsThread as a hook to trigger when something happens in game.
+Kind of like writing your own py slippi parser.'''
 
 from interact import LiveInputsThread
-from melee import Console
 from patches import _Gamestat
 from setup import start_game
-
-# path = start_command_line()
-# console = Console(path=path)
-# console.run()
-# console.connect()
 
 class GameHook(LiveInputsThread):
 
     def __init__(self, *args, **kwargs):
-        self.last_percent = -1
+        self.last_percent = -1          # init a stat of interest
         super().__init__(*args, **kwargs)
 
-    def update(self, gamestate):
+    def update(self, gamestate):        # main method, checks each frame
 
         if _Gamestat.in_game(gamestate):
 
@@ -25,14 +19,14 @@ class GameHook(LiveInputsThread):
             if has_changed:
                 if percent == 69:
                     print('power up')
-                    # stream.celebrate() or something cool
+                    # stream.celebrate() or something external like that
                 self.last_percent = percent
 
-    def new_percent(self, gamestate):
+    def new_percent(self, gamestate):   #  compares current to last frame
         percent = gamestate.player[2].percent
         changed = not percent == self.last_percent
         return percent, changed
 
 hook = GameHook()
 
-start_game((None, None, None, None), live_interface=hook)
+start_game((None, None, None, None), live_interface=hook) # use human controller

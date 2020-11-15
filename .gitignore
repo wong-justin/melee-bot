@@ -2,6 +2,6 @@ env/
 Logs/
 __pycache__/
 *.bat
-demo/*
-!demo/demo.gif
+demo/demo.mp4
+demo/notes.txt
 config.json

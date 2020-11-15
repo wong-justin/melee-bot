@@ -82,7 +82,7 @@ class LiveInputsThread(threading.Thread):
         self.onshutdown()
 
     def update(self, gamestate):
-        '''Override this.'''
+        '''Override this if you want to check something each frame.'''
         pass
 
 ###  helpers for LiveInputsThread
@@ -176,7 +176,7 @@ class LiveGameStats(LiveInputsThread):
         }
         stats.update({   # don't need gamestate
             'dur': (self._stock_duration, 'this stock duration'),
-            'track': (self._track, 'print [cmd] on updates'),
+            'track': (self._track, 'print [cmd] when it updates'),
             'no': (self._reset_tracker, 'stop tracking'),
         })
         commands.update(stats)
