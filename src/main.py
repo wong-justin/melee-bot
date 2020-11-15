@@ -18,8 +18,8 @@ args = parser.parse_args()
 ### init game + connection
 
 console = melee.Console(path=args.dolphin_executable_path)
-bot_controller = melee.Controller(console=console, port=2)#, type=melee.ControllerType.GCN_ADAPTER)
-other_controller = melee.Controller(console=console, port=1)#, type=melee.ControllerType.GCN_ADAPTER)    # dummy only to proceed past menu, replacing human for now
+bot_controller = melee.Controller(console=console, port=2)
+other_controller = melee.Controller(console=console, port=1)    # dummy only to proceed past menu, replacing human for now
 
 console.run()
 console.connect()
@@ -58,8 +58,8 @@ while True:
     if not gamestate:
         break
 
-    dummy.act(gamestate)
-    bot.act(gamestate)
+    # dummy.act(gamestate)
+    # bot.act(gamestate)
 
     live_interface.update(gamestate)
     logger.logframe(gamestate)

@@ -39,7 +39,7 @@ class LiveInputsThread(threading.Thread):
                                          description='Perform commands during gameplay.',
                                          add_help=False)    # we have custom help arg, not "-help"
         meta_commands = {
-            'test': (lambda *s:'You typed {} arg(s): {}'.format(len(s), s), 'test [your [strings ...]]'),
+            'test': (lambda *s:'You typed {} arg(s): {}'.format(len(s), s), 'test [extra] [args] ...'),
             'help': parser.print_help,  # ideally help and quit dont get wrapped in _print and _accept_args
             'quit': lambda: BREAK_FLAG  #   when it happens in _add_commands
         }                               #   but oh well
@@ -69,7 +69,7 @@ class LiveInputsThread(threading.Thread):
             except SystemExit as e: # thrown whenever parser doesn't like input
                 # print('Bad command:', e)
                 continue
-            except TypeError as e:
+            except TypeError as e:  # probably from bad command args, eg. >>> help something
                 print('Bad command extra args:', e)
                 continue
             # thrown when ctrl-c interrupts hanging input() -
@@ -81,9 +81,7 @@ class LiveInputsThread(threading.Thread):
 ###  helpers for LiveInputsThread
 
 class StoreExtraArgs(argparse.Action):
-    '''Purpose is to store any extra inputs beyond initial command
-    as function args without needing any flags.
-    This action allows inputs like:
+    '''This action allows inputs like:
     >>> connect PLUP#123 or >>> moveto 10 40
     as opposed to default parser behavior:
     >>> connect -specific_flag PLUP#123 or >>> moveto -other_flag 10 40

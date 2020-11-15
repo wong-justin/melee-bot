@@ -1,14 +1,14 @@
-# monkey patching QOL additions to melee package, v0.20.2
+'''Monkey patching QOL additions to melee package, v0.20.2'''
 
-from melee import ControllerState, Button
+from melee import ControllerState, Button, Menu
 
 class _Controller(ControllerState):
-    # new controller state class with comparisons and smaller debug output.
-    #
-    # comparable_controller = _Controller(real_controller.current)
+    '''new controller state class with comparisons and smaller debug output.
+
+    >>> comparable_controller = _Controller(real_controller.current)'''
 
     def __init__(self, existing):
-        self.button = {**existing.button}   # deepcopy
+        self.button = {**existing.button}   # deepcopy for dict
         self.main_stick = existing.main_stick
         self.c_stick = existing.c_stick
         self.l_shoulder = existing.l_shoulder
@@ -45,9 +45,15 @@ class _Controller(ControllerState):
         return self.active() - other.active()
 
 class _Gamestat:
-    # group of functions returning some nice formatted stats, given melee.Gamestate
-    #
-    # formatted_stat = Gamestat.func(real_gamestate_obj)
+    '''Group of functions for helpful stats, given melee.Gamestate.
+    These would be nice properties implemented in that class.
+    Mostly pretty printing.
+
+    >>> stat_output = Gamestat.func(real_gamestate_obj)'''
+
+    def in_game(g):
+        return g.menu_state == Menu.IN_GAME
+
 
     def gamestate(g):
         return 'Gamestate: {}'.format(g)

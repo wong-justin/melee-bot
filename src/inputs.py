@@ -39,20 +39,6 @@ def make_inputs(inputs, controller):
                     controller.release_all()
     # []  frame of nothing
 
-def inverse(_input):
-    if len(_input) < 2:
-        return _input   # can't invert wait or release_all
-    else:
-        press, btn = _input[:2]
-        if btn in (Button.BUTTON_MAIN, Button.BUTTON_C):
-            # other direction?
-            return btn
-        elif btn in (Button.BUTTON_L, Button.BUTTON_R):
-            # set to 0 or 1?
-            return btn
-        else:   # normal buttons on/off
-            return (not press, btn)
-
 def wait(n):
     '''Gives n frames of no  Use * to unpack in sequence.
     >>> inputs = [
@@ -88,12 +74,12 @@ Y = (True, Button.BUTTON_Y)
 L = (True, Button.BUTTON_L)
 R = (True, Button.BUTTON_R)
 
-taunt = (True, Button.BUTTON_D_UP)
+# taunt = (True, Button.BUTTON_D_UP)
 
-# un_A = (False, Button.BUTTON_A)
-# un_B = (False, Button.BUTTON_B)
-# un_Y = (False, Button.BUTTON_Y)
-# un_L = (False, Button.BUTTON_L)
+un_A = (False, Button.BUTTON_A)
+un_B = (False, Button.BUTTON_B)
+un_Y = (False, Button.BUTTON_Y)
+un_L = (False, Button.BUTTON_L)
 
 
 ### sequences
@@ -150,7 +136,7 @@ def fastfall_laser_rand():
 
 def taunt():
     return [
-        (taunt,),
+        ((True, Button.BUTTON_D_UP),),
         ((False, Button.BUTTON_D_UP),)
     ]
 

@@ -1,7 +1,6 @@
 env/
 Logs/
 __pycache__/
-run.bat
-activate.bat
+*.bat
 demo/*
 !demo/demo.gif

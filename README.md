@@ -14,6 +14,7 @@ An easier way to develop a SSBM bot. Enhances [libmelee](https://github.com/altf
 
 - [ ] Test on Linux, OSX
 - [ ] Generalize for other ports and online connection
+- [ ] Unit tests
 - [ ] Create command line options for starting the game
 eg. `-bot [class] -port [1] -bot [another] -port [2]`
 - [ ] Round out inputs.py
