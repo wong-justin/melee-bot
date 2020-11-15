@@ -1,18 +1,22 @@
 import argparse
 import melee
-from interact import LiveGameStats
+# from interact import LiveGameStats
+from melee2.interact import LiveGameStats
 
 def start_game(ports, live_interface=LiveGameStats(), log=True):
     '''Main method to fully start game.
-    command-line parser first needs dolphin folder path, then...
+    Command-line first asks for dolphin folder path, then uses args:
 
-    ports: 4-tuple containing either bot instances or Nones
-      eg. (None, SomeBot(), None, None)
+    ports:
+        tuple: contains 4 bot instances / Nones, eg. (None, Bot(), None, None)
+
     live_interface:
-      ignore to take default,
-      LiveInputsThread obj with custom commands,
-      None if no live thread desired (probably for performance)
-    log: write game logs to file if True'''
+        LiveInputsThread: externally initialized (prob with custom commands)
+        None: no live thread desired (probably for performance)
+        <not given>: default live thread
+
+    log:
+        bool: write game logs to file if True'''
 
     args = _start_command_line()
     console = melee.Console(path=args.path)

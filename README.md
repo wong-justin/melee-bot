@@ -11,9 +11,10 @@ An easier way to develop a SSBM bot. Enhances [libmelee](https://github.com/altf
 - Bot classes handle setup to let you focus on gameplay strategies
 
 ## Quickstart
+`pip install -e git+https://github.com/wong-justin/melee-bot.git`
+
 ```python
-from setup import start_game
-from bot import Bot
+from melee2 import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 ```
 See [demo.py](demo/demo.py) for all-around usage,
