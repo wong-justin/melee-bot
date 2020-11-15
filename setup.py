@@ -10,5 +10,8 @@ setuptools.setup(
     # long_description_content_type="text/markdown",
     url="https://github.com/wong-justin/melee-bot",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'melee',
+    ],
     python_requires='>=3.7',
 )
