@@ -1,6 +1,7 @@
 import threading
 import argparse
 from patches import _Gamestat
+import signal
 
 BREAK_FLAG = -2
 EXTRA_ARGS = 'extra_args'
@@ -33,7 +34,7 @@ class LiveInputsThread(threading.Thread):
     >>> seq b down 3 y release
     >>> quit'''
 
-    def __init__(self, onshutdown, commands={}):
+    def __init__(self, onshutdown=lambda:None, commands={}):
         '''Creates parser with given commands and starts thread awaiting input.'''
         parser = argparse.ArgumentParser(prog='',           # program name would distract
                                          description='Perform commands during gameplay.',
@@ -51,8 +52,10 @@ class LiveInputsThread(threading.Thread):
 
         self.parser = parser
         self.onshutdown = onshutdown    # callable
+        # signal.signal(signal.SIGINT, lambda sig, frame: self.shutdown)  # ctrl-c interrupt
+
         super().__init__(name='input-thread')
-        self.start()    # maybe save for caller to start when they want?
+        # self.start()    # maybe save for caller to start when they want?
 
     def run(self):
         '''Start this thread waiting for user inputs, exiting program if asked.'''
@@ -77,6 +80,10 @@ class LiveInputsThread(threading.Thread):
             #     break
 
         self.onshutdown()
+
+    def update(self, gamestate):
+        '''Override this.'''
+        pass
 
 ###  helpers for LiveInputsThread
 
@@ -154,8 +161,7 @@ class LiveGameStats(LiveInputsThread):
     >>> a
     >>> Action states: Action.CROUCHING  Action.LANDING'''
 
-    def __init__(self, onshutdown, commands={}, console=None):
-        # init with console if you want a processing time stat
+    def __init__(self, onshutdown=lambda:None, commands={}):
 
         stats = {cmd: ( self._with_gamestate(func), descrip )
              for cmd, (func, descrip) in {
@@ -169,7 +175,6 @@ class LiveGameStats(LiveInputsThread):
              }.items()
         }
         stats.update({   # don't need gamestate
-            'process': (self._processing_time, 'processing time'),
             'dur': (self._stock_duration, 'this stock duration'),
             'track': (self._track, 'print [cmd] on updates'),
             'no': (self._reset_tracker, 'stop tracking'),
@@ -179,8 +184,6 @@ class LiveGameStats(LiveInputsThread):
         super().__init__(onshutdown=onshutdown, commands=commands)
 
         # any persistent/cumulative stats
-        self._max_processing = 0     # ms
-        self._console = console      # for above
         self._stock_duration = 0     # frames
         self._stocks = 4             # tells when to reset above
         self._last_gamestate = None  # will provide rest of the stats
@@ -197,8 +200,7 @@ class LiveGameStats(LiveInputsThread):
         self._last_gamestate = gamestate
 
         # update any cumulative stats
-        self._update_processing()
-        if 2 in gamestate.player:   # game started
+        if _Gamestat.in_game(gamestate):   # game started
             self._update_stock_dur(gamestate)
 
         if self._tracker:
@@ -218,14 +220,6 @@ class LiveGameStats(LiveInputsThread):
         self._tracked_last = None
 
     # for specific stats
-
-    def _processing_time(self):
-        # a cumulative stat stored in self
-        return 'Max bot processing time: {:.2f} ms for a frame'.format(self._max_processing)
-
-    def _update_processing(self):
-        if self._console:
-            self._max_processing = max(self._max_processing, self._console.processingtime)
 
     def _stock_duration(self):
         # a cumulative stat stored in self

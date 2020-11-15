@@ -1,16 +1,15 @@
 '''Botless use of LiveInputsThread acting as a hook to trigger
 when something happens in game.'''
 
-import argparse
 from interact import LiveInputsThread
 from melee import Console
 from patches import _Gamestat
+from setup import start_game
 
-parser = argparse.ArgumentParser()
-parser.add_argument('path', help='dolphin directory')
-console = Console(path=parser.parse_args().path)
-console.run()
-console.connect()
+# path = start_command_line()
+# console = Console(path=path)
+# console.run()
+# console.connect()
 
 class GameHook(LiveInputsThread):
 
@@ -26,7 +25,7 @@ class GameHook(LiveInputsThread):
             if has_changed:
                 if percent == 69:
                     print('power up')
-                    # stream.celebrate()
+                    # stream.celebrate() or something cool
                 self.last_percent = percent
 
     def new_percent(self, gamestate):
@@ -34,9 +33,6 @@ class GameHook(LiveInputsThread):
         changed = not percent == self.last_percent
         return percent, changed
 
-hook = GameHook(onshutdown=console.stop)
-while True:
-    gamestate = console.step()
-    if not gamestate:
-        break
-    hook.update(gamestate)
+hook = GameHook()
+
+start_game((None, None, None, None), live_interface=hook)

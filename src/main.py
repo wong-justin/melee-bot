@@ -8,16 +8,13 @@ import sys
 
 ### command line starts everything
 
-parser = argparse.ArgumentParser(description='Example of libmelee in action')
-
-parser.add_argument('--dolphin_executable_path', '-e', default=None,
-                    help='The directory where dolphin is')
-
+parser = argparse.ArgumentParser()
+parser.add_argument('path', help='dolphin folder')
 args = parser.parse_args()
 
 ### init game + connection
 
-console = melee.Console(path=args.dolphin_executable_path)
+console = melee.Console(path=args.path)
 bot_controller = melee.Controller(console=console, port=2)
 other_controller = melee.Controller(console=console, port=1)    # dummy only to proceed past menu, replacing human for now
 

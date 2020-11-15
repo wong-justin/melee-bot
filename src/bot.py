@@ -2,6 +2,7 @@ import melee
 import random
 import time
 import inputs as Inputs
+from patches import _Gamestat
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
@@ -10,7 +11,7 @@ class Bot:
     '''Framework for making controller inputs.
     Offline only implementation currently.'''
 
-    def __init__(self, controller,
+    def __init__(self, controller=None,
                  character=melee.Character.FOX,
                  stage=melee.Stage.FINAL_DESTINATION):
         self.controller = controller
@@ -20,8 +21,9 @@ class Bot:
     def act(self, gamestate):
         '''Main function called each frame of game loop with updated gamestate.'''
 
-        if gamestate.menu_state in (melee.Menu.IN_GAME,
-                                    melee.Menu.SUDDEN_DEATH):
+        # if gamestate.menu_state in (melee.Menu.IN_GAME,
+        #                             melee.Menu.SUDDEN_DEATH):
+        if _Gamestat.in_game(gamestate):
             self.play_frame(gamestate)  # rand note, paused wont advance frame
         else:
             self.menu_nav(gamestate)
@@ -90,7 +92,7 @@ class CheckBot(InputsBot):
     Callbacks (self.do) take no parameters.
     Stops checking upon reaching condition.'''
 
-    def __init__(self, controller,
+    def __init__(self, controller=None,
                  character=melee.Character.FOX,
                  stage=melee.Stage.FINAL_DESTINATION):
         super().__init__(controller=controller,
@@ -158,7 +160,7 @@ def grounded(gamestate):
 class FalcoBot(CheckBot):
     # working with previous features
 
-    def __init__(self, controller):
+    def __init__(self, controller=None):
         super().__init__(controller=controller,
                          character=melee.Character.FALCO,
                          stage=melee.Stage.FINAL_DESTINATION)
@@ -265,7 +267,7 @@ class ControllableBot(InputsBot):
     # designed to easily control externally in real time,
     # eg. from live thread or perhaps a twitch chat!
 
-    def __init__(self, controller,
+    def __init__(self, controller=None,
                  character=melee.Character.FALCO,
                  stage=melee.Stage.FINAL_DESTINATION):
         super().__init__(controller, character, stage)

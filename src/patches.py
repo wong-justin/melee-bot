@@ -52,7 +52,7 @@ class _Gamestat:
     >>> stat_output = Gamestat.func(real_gamestate_obj)'''
 
     def in_game(g):
-        return g.menu_state == Menu.IN_GAME
+        return g.menu_state in (Menu.IN_GAME, Menu.SUDDEN_DEATH)
 
 
     def gamestate(g):

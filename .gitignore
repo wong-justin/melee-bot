@@ -4,3 +4,4 @@ __pycache__/
 *.bat
 demo/*
 !demo/demo.gif
+config.json

@@ -18,6 +18,7 @@ An easier way to develop a SSBM bot. Enhances [libmelee](https://github.com/altf
 - [ ] Create command line options for starting the game
 eg. `-bot [class] -port [1] -bot [another] -port [2]`
 - [ ] Round out inputs.py
+  - [ ] switch arg order in repeat()
 - [ ] Make a semi-playable bot
 - [ ] Sidequest - train a bot with machine learning
   - [ ] gather training dataset of replays
