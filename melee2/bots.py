@@ -1,9 +1,7 @@
 import melee
 import random
 import time
-# import inputs as Inputs
 import melee2.inputs as Inputs
-# from patches import _Gamestat
 from melee2.patches import _Gamestat
 
 Buttons = melee.enums.Button

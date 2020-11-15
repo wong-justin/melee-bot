@@ -4,4 +4,4 @@ __pycache__/
 *.bat
 demo/demo.mp4
 demo/notes.txt
-config.json
+misc/*

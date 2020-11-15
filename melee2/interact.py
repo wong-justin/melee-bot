@@ -1,6 +1,5 @@
 import threading
 import argparse
-# from patches import _Gamestat
 from melee2.patches import _Gamestat
 import signal
 
@@ -88,7 +87,7 @@ class LiveInputsThread(threading.Thread):
 
 ###  helpers for LiveInputsThread
 
-class StoreExtraArgs(argparse.Action):
+class _StoreExtraArgs(argparse.Action):
     '''This action allows inputs like:
     >>> connect PLUP#123 or >>> moveto 10 40
     as opposed to default parser behavior:
@@ -120,7 +119,7 @@ def _add_command(subparser_adder, command, details):
                                             help=descrip,
                                             add_help=False)
     cmd_parser.set_defaults(func=_print(_accept_any_args(func)))    # set the command
-    cmd_parser.add_argument(EXTRA_ARGS, action=StoreExtraArgs)  # allow any extra inputs as args
+    cmd_parser.add_argument(EXTRA_ARGS, action=_StoreExtraArgs)  # allow any extra inputs as args
 
 def _accept_any_args(func):
     # wrapper for taking any args that were parsed

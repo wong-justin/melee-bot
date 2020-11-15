@@ -1,9 +1,10 @@
 '''Demo of input making, bot creation, and game start.'''
 
-from melee2 import start_game, LiveGameStats
-from melee2 import Bots
+import melee2.bots as Bots
+from melee2.interact import LiveGameStats
 from melee2.inputs import *
 from melee2.patches import _Controller
+from melee2 import start_game
 
 # one line demo!
 # start_game((Bot(), Bot(), None, None))

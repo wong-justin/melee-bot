@@ -14,7 +14,8 @@ An easier way to develop a SSBM bot. Built off [libmelee](https://github.com/alt
 `pip install -e git+https://github.com/wong-justin/melee-bot.git#egg=melee2`
 
 ```python
-from melee2 import start_game, Bot
+from melee2 import start_game
+from melee2.bots import Bot
 start_game((Bot(), Bot(), None, None))
 ```
 See [demo.py](demo/demo.py) for all-around usage,

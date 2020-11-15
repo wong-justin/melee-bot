@@ -1,6 +1,5 @@
 import argparse
 import melee
-# from interact import LiveGameStats
 from melee2.interact import LiveGameStats
 
 def start_game(ports, live_interface=LiveGameStats(), log=True):
