@@ -1,6 +1,6 @@
 # melee-bot
 
-An easier way to develop a SSBM bot. Enhances [libmelee](https://github.com/altf4/libmelee) experience.
+An easier way to develop a SSBM bot. Built off [libmelee](https://github.com/altf4/libmelee).
 
 ## Demo
 ![Screen capture](./demo/demo.gif)
@@ -11,7 +11,7 @@ An easier way to develop a SSBM bot. Enhances [libmelee](https://github.com/altf
 - Bot classes handle setup to let you focus on gameplay strategies
 
 ## Quickstart
-`pip install -e git+https://github.com/wong-justin/melee-bot.git@development#egg=melee2`
+`pip install -e git+https://github.com/wong-justin/melee-bot.git#egg=melee2`
 
 ```python
 from melee2 import start_game, Bot

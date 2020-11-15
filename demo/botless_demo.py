@@ -1,9 +1,8 @@
 '''Using LiveInputsThread as a hook to trigger when something happens in game.
 Kind of like writing your own py slippi parser.'''
 
-from interact import LiveInputsThread
-from patches import _Gamestat
-from setup import start_game
+from melee2 import start_game, LiveInputsThread
+from melee2.patches import _Gamestat
 
 class GameHook(LiveInputsThread):
 

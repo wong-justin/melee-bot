@@ -1,10 +1,9 @@
 '''Demo of input making, bot creation, and game start.'''
 
-from setup import start_game
-from bot import Bot, CheckBot
-from inputs import *
-from interact import LiveGameStats
-from patches import _Controller
+from melee2 import start_game, LiveGameStats
+from melee2 import Bots
+from melee2.inputs import *
+from melee2.patches import _Controller
 
 # one line demo!
 # start_game((Bot(), Bot(), None, None))
@@ -17,7 +16,7 @@ toxic_sequence = [      # create a sequence of controller inputs
     *wait(120)
 ]
 
-class ReformBot(CheckBot):
+class ReformBot(Bots.CheckBot):
     # builds on CheckBot funcs and attrs; check them out
 
     def __init__(self, *args, **kwargs):
@@ -35,7 +34,7 @@ class ReformBot(CheckBot):
         self.do = lambda:None
 
 bot = ReformBot()
-dummy = Bot()
+dummy = Bots.Bot()
 
 live_interface = LiveGameStats(commands=bot.commands)   # init live thread
                                                         # adding our new cmds
