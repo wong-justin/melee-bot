@@ -1,6 +1,6 @@
 import threading
 import argparse
-from melee2.patches import _Gamestat
+from .patches import _Gamestat
 import signal
 
 BREAK_FLAG = -2

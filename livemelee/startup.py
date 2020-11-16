@@ -1,6 +1,6 @@
 import argparse
 import melee
-from melee2.interact import LiveGameStats
+from .interact import LiveGameStats
 
 def start_game(ports, live_interface=LiveGameStats(), log=True):
     '''Main method to fully start game.
