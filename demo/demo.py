@@ -5,7 +5,7 @@ from livemelee.patches import _Controller
 from livemelee.inputs import *
 
 # one line demo!
-# start_game((Bot(), Bot(), None, None))
+# start_game((Bot(), Bot(), None, None))    # two dummy bots will sit in game
 
 # longer demo:
 teabag = [(down,), *wait(5), (center,), *wait(5)]
@@ -24,7 +24,7 @@ class ReformBot(CheckBot):
         self.commands = {           # call these functions midgame by keypress
             'c': (lambda: _Controller(self.controller.current), # logging func
                   'inspect controller'),                        # descrip
-            'reform': self.stop,    # another func, no descrip is ok
+            'reform': self.stop,    # another cmd: func, no descrip is ok
         }
         self.set_timer(n=150,
                        do=lambda: self.perform(toxic_sequence),

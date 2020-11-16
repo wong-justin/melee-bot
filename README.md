@@ -16,7 +16,7 @@ An easier way to develop a SSBM bot. Built off [libmelee](https://github.com/alt
 #### Install
 `pip install -e git+https://github.com/wong-justin/melee-bot.git#egg=livemelee`
 
-#### Code:
+#### Code
 ```python
 # main.py
 from livemelee import start_game, Bot

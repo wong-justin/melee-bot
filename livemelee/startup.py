@@ -4,7 +4,7 @@ from .interact import LiveGameStats
 
 def start_game(ports, live_interface=LiveGameStats(), log=True):
     '''Main method to fully start game.
-    Command-line first asks for dolphin folder path, then uses args:
+    Command-line first asks for dolphin folder path, then game starts with args:
 
     ports:
         tuple: contains 4 bot instances / Nones, eg. (None, Bot(), None, None)
@@ -15,7 +15,7 @@ def start_game(ports, live_interface=LiveGameStats(), log=True):
         <not given>: default live thread
 
     log:
-        bool: write game logs to file if True'''
+        bool: write game logs to file with melee.Logger if True'''
 
     args = _start_command_line()
     console = melee.Console(path=args.path)
