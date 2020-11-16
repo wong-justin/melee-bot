@@ -9,7 +9,10 @@ Actions = melee.enums.Action
 
 class Bot:
     '''Framework for making controller inputs.
-    Offline only implementation currently.'''
+    Offline only implementation currently.
+
+    Attrs:
+        controller, character, stage'''
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -50,22 +53,20 @@ def never(gamestate):
     return False
 
 class InputsBot(Bot):
-    '''Adds inputs queue to main loop.
+    '''Adds inputs queue to Bot.
 
     Inputs should be always put into queue,
     never called directly/instantly with controller.
-    First queued input will happen same frame of queueing.'''
+    First queued input will happen same frame of queueing.
+
+    Attrs:
+        queue'''
 
     def __init__(self, controller, character, stage):
         super().__init__(controller, character, stage)
         self.queue = []
 
     def play_frame(self, gamestate):
-
-        # a fix for leftover menu presses
-        # if gamestate.frame < 0:
-        #     self.queue = [(Inputs.release,)]
-        #     return
         self.check_frame(gamestate)
         self.consume_next_inputs()
 
@@ -78,19 +79,27 @@ class InputsBot(Bot):
 
     def perform(self, input_sequence):
         '''Set queue to a sequence of inputs.
-        Useful in lambdas where assignment is not allowed'''
+        Useful in lambdas where assignment is not allowed.'''
         self.queue = list(input_sequence)  # need a (deep) copy for modifiable lists/tuples
 
     def check_frame(self, gamestate):
-        '''Decision making and input queueing happens here.'''
+        '''Override this (instead of overriding play_frame).
+        Decision making and input queueing happen here.'''
         pass
 
 class CheckBot(InputsBot):
     '''Adds condition checker to main loop.
 
-    Condition functions (self.when) take a gamestate parameter.
-    Callbacks (self.do) take no parameters.
-    Stops checking upon reaching condition.'''
+    Attrs:
+        when:   condition called every frame (func taking gamestate)
+            (ie trigger)
+        do:     func called when condition returns True
+            (ie on_trigger)
+
+    By default, stops checking upon reaching condition.
+    set_timer is example use of when and do.
+
+    Eg. self.repeat(when=self.finished_inputs, do=some_func)'''
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -101,8 +110,8 @@ class CheckBot(InputsBot):
 
         self.when = never
         self.do = lambda:None
-        self.max_time = 30  # arbitrary init
-        self.timer = self.max_time
+        self._max_time = 30  # arbitrary init
+        self._timer = self._max_time
 
     def check_frame(self, gamestate):
         '''Called each frame to check gamestate (and/or possibly self?) for condition,
@@ -111,26 +120,26 @@ class CheckBot(InputsBot):
             self.when = never
             self.do()
 
-    def times_up(self, gamestate):
-        '''A condition check that ticks timer, returning True on expire.'''
-        if self.timer > 0:
-            self.timer -= 1
-            return False
-        else:
-            self.timer = self.max_time
-            return True
-
     def set_timer(self, n, do, repeat=True):
-        '''Convenience function sets all required timer functions:
+        '''Set all required timer functions:
         n frames to wait, timer condition, callback.'''
-        self.max_time = n
-        self.timer = self.max_time
+        self._max_time = n
+        self._timer = self._max_time
         if repeat:
-            self.repeat(when=self.times_up,
+            self.repeat(when=self._times_up,
                         do=do)
         else:
-            self.when = self.times_up
+            self.when = self._times_up
             self.do = do
+
+    def _times_up(self, gamestate):
+        '''A condition check that ticks timer, returning True on expire.'''
+        if self._timer > 0:
+            self._timer -= 1
+            return False
+        else:
+            self._timer = self._max_time
+            return True
 
     def repeat(self, when, do):
         '''Keeps checking when condition (as opposed to the default stop checking).'''
@@ -141,8 +150,79 @@ class CheckBot(InputsBot):
         self.do = do_and_wait_again
 
     def finished_inputs(self, gamestate):
-        '''A condition to loop inputs by returning True when queue is empty.'''
+        '''A condition to loop inputs by returning True when queue is empty.
+
+        Eg. self.when = self.finished_inputs
+        self.do = '''
         return len(self.queue) == 0
+
+class ControllableBot(InputsBot):
+    '''Designed to easily control externally in real time,
+    eg. from live thread or perhaps something like a chat.
+
+    Attrs:
+        commands: dict of {'cmd': (func, 'description')}
+            See LiveInputsThread for details.'''
+
+    def __init__(self, controller=None,
+                 character=melee.Character.FALCO,
+                 stage=melee.Stage.FINAL_DESTINATION):
+        super().__init__(controller, character, stage)
+
+        self.commands = self._init_commands()
+        self._curr_sequence = []
+
+    def _init_commands(self):
+
+        commands = {cmd: self._set_seq(make_seq) for cmd, make_seq in {
+            'laser': Inputs.laser,
+            'sh': Inputs.shorthop,
+            'shlaser': Inputs.jump_n_laser,  #fastfall_laser_rand
+            'taunt': Inputs.taunt,
+            'shield': Inputs.shield,
+            'dd': Inputs.dashdance,
+        }.items()}
+        commands.update({cmd: self._set_seq(_make_seq(btn)) for cmd, btn in {
+            'release': Inputs.release,
+            'center': Inputs.center,
+            'down': Inputs.down,
+            'up': Inputs.up,
+            'left': Inputs.left,
+            'right': Inputs.right,
+            'A': Inputs.A,
+            'B': Inputs.B,
+            'Y': Inputs.Y,
+            'L': Inputs.L
+        }.items()})
+        # commands.update({
+        #     'undo': self.release_last,
+        # })
+        return commands
+
+    def _set_seq(self, make_seq):
+        # wrapper to set current sequence to result of sequence maker func
+        return lambda: self.set_curr_seq(make_seq())
+
+    def set_curr_seq(self, inputs):
+        self._curr_sequence = inputs# [(Inputs.release,), *inputs]
+
+    def add_to_queue(self, inputs):
+        # add to any existing inputs (usually would replace them)
+        self.queue.extend(inputs)
+
+    def check_frame(self, gamestate):
+        # keep doing current sequence, looping if finished
+
+        if len(self.queue) == 0:
+            self.perform(self._curr_sequence)
+        # if self.timer == 0:
+        #     self.queue = Inputs.laser
+
+def _make_seq(button):
+    # wrapper to put single button press into a sequence
+    return lambda: [(button,),]
+
+
 
 # some gamestate conditions not needing self
 
@@ -260,72 +340,6 @@ class FalcoBot(CheckBot):
         for press, *button_args in inputs:
             self.controller.press_button(*button_args)
             time.sleep(0.01) # could be needed if incosistent timing?
-
-
-
-class ControllableBot(InputsBot):
-    # designed to easily control externally in real time,
-    # eg. from live thread or perhaps a twitch chat!
-
-    def __init__(self, controller=None,
-                 character=melee.Character.FALCO,
-                 stage=melee.Stage.FINAL_DESTINATION):
-        super().__init__(controller, character, stage)
-
-        self.queue = []
-        self.commands = self._init_commands()
-        self.curr_sequence = []
-
-    def _init_commands(self):
-
-        commands = {cmd: self._set_seq(make_seq) for cmd, make_seq in {
-            'laser': Inputs.laser,
-            'sh': Inputs.shorthop,
-            'shlaser': Inputs.jump_n_laser,  #fastfall_laser_rand
-            'taunt': Inputs.taunt,
-            'shield': Inputs.shield,
-            'dd': Inputs.dashdance,
-        }.items()}
-        commands.update({cmd: self._set_seq(_make_seq(btn)) for cmd, btn in {
-            'release': Inputs.release,
-            'center': Inputs.center,
-            'down': Inputs.down,
-            'up': Inputs.up,
-            'left': Inputs.left,
-            'right': Inputs.right,
-            'A': Inputs.A,
-            'B': Inputs.B,
-            'Y': Inputs.Y,
-            'L': Inputs.L
-        }.items()})
-        # commands.update({
-        #     'undo': self.release_last,
-        # })
-        return commands
-
-    def _set_seq(self, make_seq):
-        # wrapper to set current sequence to result of sequence maker func
-        return lambda: self.set_curr_seq(make_seq())
-
-    def set_curr_seq(self, inputs):
-        self.curr_sequence = inputs# [(Inputs.release,), *inputs]
-
-    def add_to_queue(self, inputs):
-        # add to any existing inputs (usually would replace them)
-        self.queue.extend(inputs)
-
-    def check_frame(self, gamestate):
-        # keep doing current sequence, looping if finished
-
-        if len(self.queue) == 0:
-            self.perform(self.curr_sequence)
-        # if self.timer == 0:
-        #     self.queue = Inputs.laser
-
-def _make_seq(button):
-    # wrapper to put single button press into a sequence
-    return lambda: [(button,),]
-
 
 # under construction:
 

@@ -13,14 +13,19 @@ An easier way to develop a SSBM bot. Built off [libmelee](https://github.com/alt
 
 ## Quickstart
 
-#### Pip:
+#### Install
 `pip install -e git+https://github.com/wong-justin/melee-bot.git#egg=livemelee`
 
 #### Code:
 ```python
+# main.py
 from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 ```
+
+#### Run
+`python main.py "path/to/dolphin/folder"`
+
 See [demo.py](demo/demo.py) for all-around usage,
 or [botless_demo.py](demo/botless_demo.py) for just hooking into gameplay.
 
@@ -33,7 +38,6 @@ ___
 - [ ] Test on Linux, OSX
 - [ ] Round out inputs module
   - [ ] switch arg order in repeat()
-- [ ] CheckBot.set_timer(every, do, repeat) could sound better than (n, do, repeat)
 - [ ] use command line to set dolphin path as local config?
 - [ ] update demo gif with stat tracking
 - [ ] Make a semi-playable bot

@@ -28,4 +28,4 @@ class GameHook(LiveInputsThread):
 
 hook = GameHook()
 
-start_game((None, None, None, None), live_interface=hook) # use human controller
+start_game((None, None, None, None), live_interface=hook) # ports open for human

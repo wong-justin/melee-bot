@@ -32,10 +32,10 @@ class ReformBot(CheckBot):
     def stop(self):
         self.do = lambda:None
 
-bot = ReformBot()
 dummy = Bot()
+bot = ReformBot()
 
 live_interface = LiveGameStats(commands=bot.commands)   # init live thread
                                                         # adding our new cmds
-start_game((dummy, bot, None, None),   # use ports 1 and 2
+start_game((dummy, bot, None, None),        # use ports 1 and 2
            live_interface=live_interface)   # dont forget to pass custom obj
