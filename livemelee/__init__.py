@@ -1,3 +1,4 @@
+'''An easier way to develop a SSBM bot. Built off libmelee.'''
 from .startup import start_game
 from .interact import LiveInputsThread, LiveGameStats
 from .bots import Bot, InputsBot, CheckBot, ControllableBot
