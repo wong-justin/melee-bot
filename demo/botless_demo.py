@@ -1,8 +1,7 @@
 '''Using LiveInputsThread as a hook to trigger when something happens in game.
 Kind of like writing your own py slippi parser.'''
 
-from livemelee import start_game, LiveInputsThread
-from livemelee.patches import _Gamestat
+from livemelee import start_game, LiveInputsThread, Stat
 
 class GameHook(LiveInputsThread):
 
@@ -12,7 +11,7 @@ class GameHook(LiveInputsThread):
 
     def update(self, gamestate):        # main method, checks each frame
 
-        if _Gamestat.in_game(gamestate):
+        if Stat.in_game(gamestate):
 
             percent, has_changed = self.new_percent(gamestate)
             if has_changed:

@@ -13,9 +13,11 @@ setuptools.setup(
     install_requires=[
         'melee',
     ],
-    # setup_requires=['setuptools_git', 'setuptools_scm'],
-    package_data={'': ['documentation.md']},
-    include_package_data=True,  # include documentation.md
     python_requires='>=3.7',
     keywords=['melee', 'smash bros', 'slippi'],
+
+    # for documentation.md:
+    # setup_requires=['setuptools_git', 'setuptools_scm'],
+    package_data={'': ['documentation.md']},
+    include_package_data=True,
 )

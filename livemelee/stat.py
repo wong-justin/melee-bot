@@ -4,8 +4,8 @@ Two kinds:
     conditions returning bools, and
     pretty printers returning strings.
 
-It would be nice if these were implemented in melee.Gamestate as properties,
-but we make do with this patchy module.
+These would be nice additions to melee.Gamestate,
+but we make do with this patchy submodule.
 
 >>> stat_output = Stat.func(real_gamestate_obj)'''
 
@@ -29,7 +29,9 @@ def not_taunting(gamestate):
 def grounded(gamestate):
     return gamestate.player[2].on_ground
 
+
 ### pretty printing
+
 
 def gamestate(g):
     return 'Gamestate: {}'.format(g)

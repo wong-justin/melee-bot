@@ -44,7 +44,7 @@ ___
 - [ ] use command line to set dolphin path as local config?
 - [ ] update demo gif with stat tracking
 - [ ] clean up docs formatting
-  - [ ] move documentation.md out of package? makes sense but low priority
+  - [ ] replace documentation.md with formatted docstring in __init__
 - [ ] Make a semi-playable bot
 - [ ] Sidequest - train a bot with machine learning
   - [ ] gather training dataset of replays

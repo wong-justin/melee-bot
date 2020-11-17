@@ -1,9 +1,8 @@
 '''Demo of input making, bot creation, and game start.'''
 
-from livemelee import start_game, Bot, CheckBot, LiveGameStats
-from livemelee.patches import _Controller
-from livemelee.inputs import *
-
+from livemelee import start_game, Bot, CheckBot, LiveGameStats, buttons
+from livemelee.inputs import *  # alternative to `from livemelee import Inputs`
+                                #  and then using Inputs.down, etc
 # one line demo!
 # start_game((Bot(), Bot(), None, None))    # two dummy bots will sit in game
 
@@ -21,10 +20,10 @@ class ReformBot(CheckBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.commands = {           # user calls these midgame in shell by keypress
-            'c': (lambda: _Controller(self.controller.current), # logging func
-                  'inspect controller'),                        # descrip
-            'reform': self.stop,    # another cmd: func - no descrip is ok
+        self.commands = {          # user calls these midgame in shell by keypress
+            'c': (lambda: buttons(self.controller.current), # logging func
+                  'inspect controller'),                    # descrip
+            'reform': self.stop,   # another cmd: func - no descrip is ok
         }
         self.set_timer(n=150,
                        do=lambda: self.perform(toxic_sequence),
