@@ -21,7 +21,7 @@ class ReformBot(CheckBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.commands = {           # call these functions midgame by keypress
+        self.commands = {           # user calls these midgame in shell by keypress
             'c': (lambda: _Controller(self.controller.current), # logging func
                   'inspect controller'),                        # descrip
             'reform': self.stop,    # another cmd: func - no descrip is ok
