@@ -33,23 +33,24 @@ start_game((Bot(), Bot(), None, None))
 <ul>
 <li><code>start_game</code> - function handles Dolphin startup to get in-game</li>
 <li><code>LiveInputsThread</code>, <code>LiveGameStats</code> - manage user commands during gameplay</li>
-<li><code>Bot</code>, <code>InputsBot</code>, <code>CheckBot</code>, <code>ControllableBot</code> - some bots to use or extend</li>
-<li><code>_Gamestat</code>, <code>_Controller</code> - some convenience patches for libmelee classes</li>
-<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> - submodule holding buttons + sequence constants, and helper funcs</li>
+<li><code>Stat</code> - submodule with conditions and pretty prints for <code>melee.GameState</code></li>
+<li><code>Inputs</code> - submodule holding buttons + sequence constants, and helper funcs</li>
+<li><code>Bot</code>, <code>InputsBot</code>, <code>CheckBot</code>, <code>ControllableBot</code> - some bot classes to use or extend</li>
+<li><code>buttons</code> - extra debugging features for <code>melee.ControllerState</code></li>
 </ul>
 <h2 id="general-flow">General flow</h2>
-<ol>
+<ul>
 <li>Create a bot and implement its main loop method:</li>
-</ol>
+</ul>
 <pre><code class="language-python">class MyBot(InputsBot):
 
     def check_frame(self, gamestate):
         if gamestate.frame % 120 == 0:
             self.make_some_inputs()
 </code></pre>
-<ol>
+<ul>
 <li>&hellip; by telling it when to make what inputs:</li>
-</ol>
+</ul>
 <pre><code class="language-python">    def make_some_inputs(self):
         self.queue = [
             (down,),
@@ -59,9 +60,9 @@ start_game((Bot(), Bot(), None, None))
             *taunt(),
         ]
 </code></pre>
-<ol>
+<ul>
 <li>Init an interactive thread with custom commands:</li>
-</ol>
+</ul>
 <pre><code class="language-python">live_interface = LiveGameStats(commands={
     'i': (bot.set_some_inputs,
           'make inputs now'),
@@ -71,15 +72,15 @@ start_game((Bot(), Bot(), None, None))
              'next input queued'),
 })
 </code></pre>
-<ol>
+<ul>
 <li>Put bots in ports and give interactive thread:</li>
-</ol>
+</ul>
 <pre><code class="language-python">start_game((None, MyBot(), None, None),
            live_interface=live_interface)
 </code></pre>
-<ol>
+<ul>
 <li>Run on command line, passing dolphin path: <code>python main.py "path/to/dolphin/folder"</code></li>
-</ol>
+</ul>
 <h2 id="more">More</h2>
 <p>Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!</p>
 <p>Read up on the API used, <a href="https://github.com/altf4/libmelee">libmelee</a>: getting frame info from Gamestate, etc.</p>
