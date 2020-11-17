@@ -1,6 +1,6 @@
 import threading
 import argparse
-from .patches import _Gamestat
+from . import Stat
 import signal
 
 BREAK_FLAG = -2
@@ -166,13 +166,13 @@ class LiveGameStats(LiveInputsThread):
 
         stats = {cmd: ( self._with_gamestate(func), descrip )
              for cmd, (func, descrip) in {
-                'f': (_Gamestat.frame_num, 'frame num'),
-                'p': (_Gamestat.percents, 'percents'),
-                'd': (_Gamestat.distance, 'distance'),
-                'a': (_Gamestat.actions, 'action states'),
-                'g': (_Gamestat.gamestate, 'gamestate'),
-                'm': (_Gamestat.menu, 'menu'),
-                'stocks': (_Gamestat.stocks, 'stocks'),
+                'f': (Stat.frame_num, 'frame num'),
+                'p': (Stat.percents, 'percents'),
+                'd': (Stat.distance, 'distance'),
+                'a': (Stat.actions, 'action states'),
+                'g': (Stat.gamestate, 'gamestate'),
+                'm': (Stat.menu, 'menu'),
+                'stocks': (Stat.stocks, 'stocks'),
              }.items()
         }
         stats.update({   # don't need gamestate
@@ -201,7 +201,7 @@ class LiveGameStats(LiveInputsThread):
         self._last_gamestate = gamestate
 
         # update any cumulative stats
-        if _Gamestat.in_game(gamestate):   # game started
+        if Stat.in_game(gamestate):   # game started
             self._update_stock_dur(gamestate)
 
         if self._tracker:

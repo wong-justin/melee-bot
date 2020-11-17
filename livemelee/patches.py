@@ -1,6 +1,6 @@
 '''Monkey patching QOL additions to melee package, v0.20.2'''
 
-from melee import ControllerState, Button, Menu
+from melee import ControllerState, Button
 
 class _Controller(ControllerState):
     '''Extending ControllerState with comparisons and smaller debug output.
@@ -43,36 +43,3 @@ class _Controller(ControllerState):
 
     def __sub__(self, other):
         return self.active() - other.active()
-
-class _Gamestat:
-    '''Group of functions returning helpful stats, given melee.Gamestate.
-    These would be nice properties implemented in that class.
-    Mostly pretty printing.
-
-    >>> stat_output = Gamestat.func(real_gamestate_obj)'''
-
-    def in_game(g):
-        return g.menu_state in (Menu.IN_GAME, Menu.SUDDEN_DEATH)
-
-
-    def gamestate(g):
-        return 'Gamestate: {}'.format(g)
-
-    def frame_num(g):
-        return 'Frame num: {}'.format(g.frame)
-
-    def menu(g):
-        return 'Menu: {}'.format(g.menu_state)
-
-    def distance(g):
-        return 'Distance: {:4f}'.format(g.distance)
-
-    def percents(g):
-        return 'Percents: {}%  {}%'.format(g.player[1].percent,
-                                           g.player[2].percent)
-    def actions(g):
-        return 'Action states: {}  {}'.format(g.player[1].action,
-                                              g.player[2].action)
-    def stocks(g):
-        return 'Stocks: {}  {}'.format(g.player[1].stock,
-                                       g.player[2].stock)

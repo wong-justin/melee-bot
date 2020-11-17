@@ -1,8 +1,8 @@
 import melee
 import random
 import time
-from . import inputs as Inputs
-from .patches import _Gamestat
+from . import Inputs
+from . import Stat
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
@@ -28,7 +28,7 @@ class Bot:
 
         # if gamestate.menu_state in (melee.Menu.IN_GAME,
         #                             melee.Menu.SUDDEN_DEATH):
-        if _Gamestat.in_game(gamestate):
+        if Stat.in_game(gamestate):
             self.play_frame(gamestate)  # rand note, paused wont advance frame
         else:
             self.menu_nav(gamestate)
@@ -227,21 +227,6 @@ def _make_seq(button):
     # wrapper to put single button press into a sequence
     return lambda: [(button,),]
 
-
-
-# some gamestate conditions not needing self
-
-def not_lasering(gamestate):
-    # just for standing, no aerial actions
-    return not gamestate.player[2].action in (Actions.LASER_GUN_PULL,
-                                              Actions.NEUTRAL_B_CHARGING,
-                                              Actions.NEUTRAL_B_ATTACKING)
-def not_taunting(gamestate):
-    return not gamestate.player[2].action in (Actions.TAUNT_LEFT,
-                                              Actions.TAUNT_RIGHT)
-def grounded(gamestate):
-    return gamestate.player[2].on_ground
-
 class FalcoBot(CheckBot):
     # working with previous features
 
@@ -270,7 +255,7 @@ class FalcoBot(CheckBot):
                     do=self.jump)
 
     def can_jump(self, gamestate):
-        if grounded(gamestate):
+        if Stat.grounded(gamestate):
             if self.jumped:
                 return False
             else:
@@ -311,7 +296,7 @@ class FalcoBot(CheckBot):
                 return True
             else:
                 self.timer -= 1
-                if not grounded(gamestate):
+                if not Stat.grounded(gamestate):
                     self.jumped = True  # should be success but just let timer tick
             return False
 
@@ -328,7 +313,7 @@ class FalcoBot(CheckBot):
         # keeps setting queue until taunting actually happens
 
         # self.last_when = self.when
-        self.when = not_taunting
+        self.when = Stat.not_taunting
         self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])
 
     def ragequit(self): #, angry_misinput=True):
