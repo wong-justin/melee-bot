@@ -333,6 +333,11 @@ class FalcoBot(CheckBot):
 
 # under construction:
 
+# def _with_ports(self, func):
+#     def stat_with_ports(gamestate):
+#         return func(gamestate, self.my_port, self.opp_port)
+#     return stat_with_ports
+
 # class MultiCheckBot(InputsBot):
 #
 #     FINISH_NOW = 1

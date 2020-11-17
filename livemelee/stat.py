@@ -29,7 +29,6 @@ def not_taunting(gamestate):
 def grounded(gamestate):
     return gamestate.player[2].on_ground
 
-
 ### pretty printing
 
 
@@ -48,6 +47,11 @@ def distance(g):
 def percents(g):
     return 'Percents: {}%  {}%'.format(g.player[1].percent,
                                      g.player[2].percent)
+
+# def percents(g, my_port, other_port):
+#     return 'Percents: {}%  {}%'.format(g.player[my_port].percent,
+#                                        g.player[other_port].percent)
+
 def actions(g):
     return 'Action states: {}  {}'.format(g.player[1].action,
                                         g.player[2].action)

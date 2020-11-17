@@ -39,6 +39,7 @@ ___
 - [ ] Generalize for other ports and online connection
 - [ ] Unit tests
 - [ ] Test on Linux, OSX
+- [ ] refactor misc tidbits as utils submodule?
 - [ ] Round out inputs module
   - [ ] switch arg order in repeat()
 - [ ] use command line to set dolphin path as local config?
