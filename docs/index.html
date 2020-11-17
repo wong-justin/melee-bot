@@ -90,11 +90,15 @@ start_game((Bot(), Bot(), None, None))
 <pre><code class="python">&#39;&#39;&#39;An easier way to develop a SSBM bot. Built off libmelee.
 
 .. include:: ./documentation.md&#39;&#39;&#39;
+# don&#39;t want to clutter namespace with their many members
+# must come first bc other files reference the capital alias
+from . import stat as Stat
+from . import inputs as Inputs
+
 from .startup import start_game
 from .interact import LiveInputsThread, LiveGameStats
 from .bots import Bot, InputsBot, CheckBot, ControllableBot
-from .patches import _Gamestat, _Controller
-from . import inputs    # don&#39;t want to clutter namespace</code></pre>
+from .patches import buttons</code></pre>
 </details>
 </section>
 <section>
@@ -114,11 +118,15 @@ from . import inputs    # don&#39;t want to clutter namespace</code></pre>
 </dd>
 <dt><code class="name"><a title="livemelee.patches" href="patches.html">livemelee.patches</a></code></dt>
 <dd>
-<div class="desc"><p>Monkey patching QOL additions to melee package, v0.20.2</p></div>
+<div class="desc"></div>
 </dd>
 <dt><code class="name"><a title="livemelee.startup" href="startup.html">livemelee.startup</a></code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="livemelee.stat" href="stat.html">livemelee.stat</a></code></dt>
+<dd>
+<div class="desc"><p>Group of functions returning helpful stats, given melee.Gamestate …</p></div>
 </dd>
 </dl>
 </section>
@@ -147,6 +155,7 @@ from . import inputs    # don&#39;t want to clutter namespace</code></pre>
 <li><code><a title="livemelee.interact" href="interact.html">livemelee.interact</a></code></li>
 <li><code><a title="livemelee.patches" href="patches.html">livemelee.patches</a></code></li>
 <li><code><a title="livemelee.startup" href="startup.html">livemelee.startup</a></code></li>
+<li><code><a title="livemelee.stat" href="stat.html">livemelee.stat</a></code></li>
 </ul>
 </li>
 </ul>

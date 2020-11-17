@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>livemelee.patches API documentation</title>
-<meta name="description" content="Monkey patching QOL additions to melee package, v0.20.2" />
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,21 +22,20 @@
 <h1 class="title">Module <code>livemelee.patches</code></h1>
 </header>
 <section id="section-intro">
-<p>Monkey patching QOL additions to melee package, v0.20.2</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#39;&#39;&#39;Monkey patching QOL additions to melee package, v0.20.2&#39;&#39;&#39;
+<pre><code class="python">from melee import ControllerState, Button
 
-from melee import ControllerState, Button, Menu
+class ComparableControllerState(ControllerState):
+    &#39;&#39;&#39;Extending melee.ControllerState with comparisons and smaller debug output.
 
-class _Controller(ControllerState):
-    &#39;&#39;&#39;Extending ControllerState with comparisons and smaller debug output.
-
-    &gt;&gt;&gt; comparable_controller = _Controller(real_controller.current)&#39;&#39;&#39;
+    These would be nice additions to melee.ControllerState,
+    but we make do with this patchy class.&#39;&#39;&#39;
 
     def __init__(self, existing):
+        # constructor copying a melee.ControllerState
         self.button = {**existing.button}   # deepcopy for dict
         self.main_stick = existing.main_stick
         self.c_stick = existing.c_stick
@@ -66,45 +65,20 @@ class _Controller(ControllerState):
     def __eq__(self, other):
         # any buttons in different state?
         # should also compare stick positions (and then L/R amount) but oh well
-        if isinstance(other, _Controller):
+        if isinstance(other, ComparableControllerState):
             return len(self - other) == 0
         return False
 
     def __sub__(self, other):
         return self.active() - other.active()
 
-class _Gamestat:
-    &#39;&#39;&#39;Group of functions returning helpful stats, given melee.Gamestate.
-    These would be nice properties implemented in that class.
-    Mostly pretty printing.
 
-    &gt;&gt;&gt; stat_output = Gamestat.func(real_gamestate_obj)&#39;&#39;&#39;
+def buttons(controller_state):
+    &#39;&#39;&#39;Returns comparable controller state with smaller debug output.
 
-    def in_game(g):
-        return g.menu_state in (Menu.IN_GAME, Menu.SUDDEN_DEATH)
-
-
-    def gamestate(g):
-        return &#39;Gamestate: {}&#39;.format(g)
-
-    def frame_num(g):
-        return &#39;Frame num: {}&#39;.format(g.frame)
-
-    def menu(g):
-        return &#39;Menu: {}&#39;.format(g.menu_state)
-
-    def distance(g):
-        return &#39;Distance: {:4f}&#39;.format(g.distance)
-
-    def percents(g):
-        return &#39;Percents: {}%  {}%&#39;.format(g.player[1].percent,
-                                           g.player[2].percent)
-    def actions(g):
-        return &#39;Action states: {}  {}&#39;.format(g.player[1].action,
-                                              g.player[2].action)
-    def stocks(g):
-        return &#39;Stocks: {}  {}&#39;.format(g.player[1].stock,
-                                       g.player[2].stock)</code></pre>
+    &gt;&gt;&gt; print( buttons(controller.current) )
+    &gt;&gt;&gt; print( buttons(controller.current) == buttons(controller.prev) )&#39;&#39;&#39;
+    return ComparableControllerState(controller_state)</code></pre>
 </details>
 </section>
 <section>
@@ -112,8 +86,123 @@ class _Gamestat:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="livemelee.patches.buttons"><code class="name flex">
+<span>def <span class="ident">buttons</span></span>(<span>controller_state)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns comparable controller state with smaller debug output.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print( buttons(controller.current) )
+&gt;&gt;&gt; print( buttons(controller.current) == buttons(controller.prev) )
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def buttons(controller_state):
+    &#39;&#39;&#39;Returns comparable controller state with smaller debug output.
+
+    &gt;&gt;&gt; print( buttons(controller.current) )
+    &gt;&gt;&gt; print( buttons(controller.current) == buttons(controller.prev) )&#39;&#39;&#39;
+    return ComparableControllerState(controller_state)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="livemelee.patches.ComparableControllerState"><code class="flex name class">
+<span>class <span class="ident">ComparableControllerState</span></span>
+<span>(</span><span>existing)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extending melee.ControllerState with comparisons and smaller debug output.</p>
+<p>These would be nice additions to melee.ControllerState,
+but we make do with this patchy class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ComparableControllerState(ControllerState):
+    &#39;&#39;&#39;Extending melee.ControllerState with comparisons and smaller debug output.
+
+    These would be nice additions to melee.ControllerState,
+    but we make do with this patchy class.&#39;&#39;&#39;
+
+    def __init__(self, existing):
+        # constructor copying a melee.ControllerState
+        self.button = {**existing.button}   # deepcopy for dict
+        self.main_stick = existing.main_stick
+        self.c_stick = existing.c_stick
+        self.l_shoulder = existing.l_shoulder
+        self.r_shoulder = existing.r_shoulder
+
+    def active(self):
+        # returns set of buttons(+sticks) not in default position
+        # digitals
+        active = {btn for btn, pressed in self.button.items() if pressed}
+        # analogs
+        if not self.main_stick == (.5, .5): # perhaps rare float comparison error? not important now
+            active.add(Button.BUTTON_MAIN)
+        if not self.c_stick == (.5, .5):
+            active.add(Button.BUTTON_C)
+        if not self.l_shoulder == 0:
+            active.add(Button.BUTTON_L)
+        if not self.r_shoulder == 0:
+            active.add(Button.BUTTON_R)
+        return active
+
+    def __str__(self):
+        btns = self.active()
+        return &#39; &#39;.join(str(b) for b in btns) if btns else &#39;neutral&#39;
+        # return &#39; &#39;.join(&#39;{}:{}&#39;.format(btn,pressed) for btn,pressed in self.button.items())
+
+    def __eq__(self, other):
+        # any buttons in different state?
+        # should also compare stick positions (and then L/R amount) but oh well
+        if isinstance(other, ComparableControllerState):
+            return len(self - other) == 0
+        return False
+
+    def __sub__(self, other):
+        return self.active() - other.active()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>melee.controller.ControllerState</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="livemelee.patches.ComparableControllerState.active"><code class="name flex">
+<span>def <span class="ident">active</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def active(self):
+    # returns set of buttons(+sticks) not in default position
+    # digitals
+    active = {btn for btn, pressed in self.button.items() if pressed}
+    # analogs
+    if not self.main_stick == (.5, .5): # perhaps rare float comparison error? not important now
+        active.add(Button.BUTTON_MAIN)
+    if not self.c_stick == (.5, .5):
+        active.add(Button.BUTTON_C)
+    if not self.l_shoulder == 0:
+        active.add(Button.BUTTON_L)
+    if not self.r_shoulder == 0:
+        active.add(Button.BUTTON_R)
+    return active</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -125,6 +214,21 @@ class _Gamestat:
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="livemelee" href="index.html">livemelee</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="livemelee.patches.buttons" href="#livemelee.patches.buttons">buttons</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="livemelee.patches.ComparableControllerState" href="#livemelee.patches.ComparableControllerState">ComparableControllerState</a></code></h4>
+<ul class="">
+<li><code><a title="livemelee.patches.ComparableControllerState.active" href="#livemelee.patches.ComparableControllerState.active">active</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -29,8 +29,8 @@
 <pre><code class="python">import melee
 import random
 import time
-from . import inputs as Inputs
-from .patches import _Gamestat
+from . import Inputs
+from . import Stat
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
@@ -56,7 +56,7 @@ class Bot:
 
         # if gamestate.menu_state in (melee.Menu.IN_GAME,
         #                             melee.Menu.SUDDEN_DEATH):
-        if _Gamestat.in_game(gamestate):
+        if Stat.in_game(gamestate):
             self.play_frame(gamestate)  # rand note, paused wont advance frame
         else:
             self.menu_nav(gamestate)
@@ -255,21 +255,6 @@ def _make_seq(button):
     # wrapper to put single button press into a sequence
     return lambda: [(button,),]
 
-
-
-# some gamestate conditions not needing self
-
-def not_lasering(gamestate):
-    # just for standing, no aerial actions
-    return not gamestate.player[2].action in (Actions.LASER_GUN_PULL,
-                                              Actions.NEUTRAL_B_CHARGING,
-                                              Actions.NEUTRAL_B_ATTACKING)
-def not_taunting(gamestate):
-    return not gamestate.player[2].action in (Actions.TAUNT_LEFT,
-                                              Actions.TAUNT_RIGHT)
-def grounded(gamestate):
-    return gamestate.player[2].on_ground
-
 class FalcoBot(CheckBot):
     # working with previous features
 
@@ -298,7 +283,7 @@ class FalcoBot(CheckBot):
                     do=self.jump)
 
     def can_jump(self, gamestate):
-        if grounded(gamestate):
+        if Stat.grounded(gamestate):
             if self.jumped:
                 return False
             else:
@@ -339,7 +324,7 @@ class FalcoBot(CheckBot):
                 return True
             else:
                 self.timer -= 1
-                if not grounded(gamestate):
+                if not Stat.grounded(gamestate):
                     self.jumped = True  # should be success but just let timer tick
             return False
 
@@ -356,7 +341,7 @@ class FalcoBot(CheckBot):
         # keeps setting queue until taunting actually happens
 
         # self.last_when = self.when
-        self.when = not_taunting
+        self.when = Stat.not_taunting
         self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])
 
     def ragequit(self): #, angry_misinput=True):
@@ -425,19 +410,6 @@ class FalcoBot(CheckBot):
     return True</code></pre>
 </details>
 </dd>
-<dt id="livemelee.bots.grounded"><code class="name flex">
-<span>def <span class="ident">grounded</span></span>(<span>gamestate)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def grounded(gamestate):
-    return gamestate.player[2].on_ground</code></pre>
-</details>
-</dd>
 <dt id="livemelee.bots.never"><code class="name flex">
 <span>def <span class="ident">never</span></span>(<span>gamestate)</span>
 </code></dt>
@@ -449,36 +421,6 @@ class FalcoBot(CheckBot):
 </summary>
 <pre><code class="python">def never(gamestate):
     return False</code></pre>
-</details>
-</dd>
-<dt id="livemelee.bots.not_lasering"><code class="name flex">
-<span>def <span class="ident">not_lasering</span></span>(<span>gamestate)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def not_lasering(gamestate):
-    # just for standing, no aerial actions
-    return not gamestate.player[2].action in (Actions.LASER_GUN_PULL,
-                                              Actions.NEUTRAL_B_CHARGING,
-                                              Actions.NEUTRAL_B_ATTACKING)</code></pre>
-</details>
-</dd>
-<dt id="livemelee.bots.not_taunting"><code class="name flex">
-<span>def <span class="ident">not_taunting</span></span>(<span>gamestate)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def not_taunting(gamestate):
-    return not gamestate.player[2].action in (Actions.TAUNT_LEFT,
-                                              Actions.TAUNT_RIGHT)</code></pre>
 </details>
 </dd>
 </dl>
@@ -527,7 +469,7 @@ Offline only implementation currently.</p>
 
         # if gamestate.menu_state in (melee.Menu.IN_GAME,
         #                             melee.Menu.SUDDEN_DEATH):
-        if _Gamestat.in_game(gamestate):
+        if Stat.in_game(gamestate):
             self.play_frame(gamestate)  # rand note, paused wont advance frame
         else:
             self.menu_nav(gamestate)
@@ -567,7 +509,7 @@ Offline only implementation currently.</p>
 
     # if gamestate.menu_state in (melee.Menu.IN_GAME,
     #                             melee.Menu.SUDDEN_DEATH):
-    if _Gamestat.in_game(gamestate):
+    if Stat.in_game(gamestate):
         self.play_frame(gamestate)  # rand note, paused wont advance frame
     else:
         self.menu_nav(gamestate)</code></pre>
@@ -986,7 +928,7 @@ See LiveInputsThread for details.</dd>
                     do=self.jump)
 
     def can_jump(self, gamestate):
-        if grounded(gamestate):
+        if Stat.grounded(gamestate):
             if self.jumped:
                 return False
             else:
@@ -1027,7 +969,7 @@ See LiveInputsThread for details.</dd>
                 return True
             else:
                 self.timer -= 1
-                if not grounded(gamestate):
+                if not Stat.grounded(gamestate):
                     self.jumped = True  # should be success but just let timer tick
             return False
 
@@ -1044,7 +986,7 @@ See LiveInputsThread for details.</dd>
         # keeps setting queue until taunting actually happens
 
         # self.last_when = self.when
-        self.when = not_taunting
+        self.when = Stat.not_taunting
         self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])
 
     def ragequit(self): #, angry_misinput=True):
@@ -1080,7 +1022,7 @@ See LiveInputsThread for details.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def can_jump(self, gamestate):
-    if grounded(gamestate):
+    if Stat.grounded(gamestate):
         if self.jumped:
             return False
         else:
@@ -1121,7 +1063,7 @@ See LiveInputsThread for details.</dd>
             return True
         else:
             self.timer -= 1
-            if not grounded(gamestate):
+            if not Stat.grounded(gamestate):
                 self.jumped = True  # should be success but just let timer tick
         return False
 
@@ -1252,7 +1194,7 @@ See LiveInputsThread for details.</dd>
     # keeps setting queue until taunting actually happens
 
     # self.last_when = self.when
-    self.when = not_taunting
+    self.when = Stat.not_taunting
     self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])</code></pre>
 </details>
 </dd>
@@ -1417,10 +1359,7 @@ Useful in lambdas where assignment is not allowed.</p></div>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="livemelee.bots.always" href="#livemelee.bots.always">always</a></code></li>
-<li><code><a title="livemelee.bots.grounded" href="#livemelee.bots.grounded">grounded</a></code></li>
 <li><code><a title="livemelee.bots.never" href="#livemelee.bots.never">never</a></code></li>
-<li><code><a title="livemelee.bots.not_lasering" href="#livemelee.bots.not_lasering">not_lasering</a></code></li>
-<li><code><a title="livemelee.bots.not_taunting" href="#livemelee.bots.not_taunting">not_taunting</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

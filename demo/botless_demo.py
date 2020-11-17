@@ -20,7 +20,7 @@ class GameHook(LiveInputsThread):
                     # stream.celebrate() or something external like that
                 self.last_percent = percent
 
-    def new_percent(self, gamestate):   #  compares current to last frame
+    def new_percent(self, gamestate):   #  condition compares current to last frame
         percent = gamestate.player[2].percent
         changed = not percent == self.last_percent
         return percent, changed
