@@ -29,6 +29,9 @@ start_game((Bot(), Bot(), None, None))
 See [demo.py](demo/demo.py) for all-around usage,
 or [botless_demo.py](demo/botless_demo.py) for just hooking into gameplay.
 
+## Docs
+https://wong-justin.github.io/melee-bot/
+
 ___
 
 #### Todo
@@ -40,6 +43,8 @@ ___
   - [ ] switch arg order in repeat()
 - [ ] use command line to set dolphin path as local config?
 - [ ] update demo gif with stat tracking
+- [ ] clean up docs formatting
+  - [ ] move documentation.md out of package? makes sense but low priority
 - [ ] Make a semi-playable bot
 - [ ] Sidequest - train a bot with machine learning
   - [ ] gather training dataset of replays

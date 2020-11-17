@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>livemelee API documentation</title>
-<meta name="description" content="An easier way to develop a SSBM bot. Built off libmelee." />
+<meta name="description" content="An easier way to develop a SSBM bot. Built off libmelee …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -23,11 +23,73 @@
 </header>
 <section id="section-intro">
 <p>An easier way to develop a SSBM bot. Built off libmelee.</p>
+<h2 id="quick-example">Quick Example</h2>
+<pre><code class="language-python"># main.py
+from livemelee import start_game, Bot
+start_game((Bot(), Bot(), None, None))
+</code></pre>
+<p><b>Run</b> <code>python main.py "path/to/dolphin/folder"</code></p>
+<h2 id="importable-from-livemelee">Importable from <code><a title="livemelee" href="#livemelee">livemelee</a></code></h2>
+<ul>
+<li><code>start_game</code> - function handles Dolphin startup to get in-game</li>
+<li><code>LiveInputsThread</code>, <code>LiveGameStats</code> - manage user commands during gameplay</li>
+<li><code>Bot</code>, <code>InputsBot</code>, <code>CheckBot</code>, <code>ControllableBot</code> - some bots to use or extend</li>
+<li><code>_Gamestat</code>, <code>_Controller</code> - some convenience patches for libmelee classes</li>
+<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> - submodule holding buttons + sequence constants, and helper funcs</li>
+</ul>
+<h2 id="general-flow">General flow</h2>
+<ol>
+<li>Create a bot and implement its main loop method:</li>
+</ol>
+<pre><code class="language-python">class MyBot(InputsBot):
+
+    def check_frame(self, gamestate):
+        if gamestate.frame % 120 == 0:
+            self.make_some_inputs()
+</code></pre>
+<ol>
+<li>&hellip; by telling it when to make what inputs:</li>
+</ol>
+<pre><code class="language-python">    def make_some_inputs(self):
+        self.queue = [
+            (down,),
+            (B,),
+            (release,),
+            *wait(5),
+            *taunt(),
+        ]
+</code></pre>
+<ol>
+<li>Init an interactive thread with custom commands:</li>
+</ol>
+<pre><code class="language-python">live_interface = LiveGameStats(commands={
+    'i': (bot.set_some_inputs,
+          'make inputs now'),
+    'msg': (lambda: 'a message',
+          'print a message'),
+    'next': (lambda: bot.queue[0],
+             'next input queued'),
+})
+</code></pre>
+<ol>
+<li>Put bots in ports and give interactive thread:</li>
+</ol>
+<pre><code class="language-python">start_game((None, MyBot(), None, None),
+           live_interface=live_interface)
+</code></pre>
+<ol>
+<li>Run on command line, passing dolphin path: <code>python main.py "path/to/dolphin/folder"</code></li>
+</ol>
+<h2 id="more">More</h2>
+<p>Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!</p>
+<p>Read up on the API used, <a href="https://github.com/altf4/libmelee">libmelee</a>: getting frame info from Gamestate, etc.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#39;&#39;&#39;An easier way to develop a SSBM bot. Built off libmelee.&#39;&#39;&#39;
+<pre><code class="python">&#39;&#39;&#39;An easier way to develop a SSBM bot. Built off libmelee.
+
+.. include:: ./documentation.md&#39;&#39;&#39;
 from .startup import start_game
 from .interact import LiveInputsThread, LiveGameStats
 from .bots import Bot, InputsBot, CheckBot, ControllableBot
@@ -70,7 +132,12 @@ from . import inputs    # don&#39;t want to clutter namespace</code></pre>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#quick-example">Quick Example</a></li>
+<li><a href="#importable-from-livemelee">Importable from livemelee</a></li>
+<li><a href="#general-flow">General flow</a></li>
+<li><a href="#more">More</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>

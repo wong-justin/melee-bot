@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="livemelee",
-    version="0.1.2",
+    version="0.1.3",
     author="Justin Wong",
     author_email="jkwongfl@yahoo.com",
     description="An easier way to develop a SSBM bot. Built off libmelee.",
@@ -13,6 +13,9 @@ setuptools.setup(
     install_requires=[
         'melee',
     ],
+    # setup_requires=['setuptools_git', 'setuptools_scm'],
+    package_data={'': ['documentation.md']},
+    include_package_data=True,  # include documentation.md
     python_requires='>=3.7',
     keywords=['melee', 'smash bros', 'slippi'],
 )
