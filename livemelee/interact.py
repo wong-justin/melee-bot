@@ -13,9 +13,10 @@ class LiveInputsThread(threading.Thread):
     Used for live debugging or injecting commands to gameplay.
     Commands should not print anything themselves - just return string/data, if anything.
 
-    Commands format: {'cmd': func} or better {'cmd': (func, 'descrip/directions')}
+    Commands format: `{'cmd': func}` or better `{'cmd': (func, 'descrip/directions')}`
 
     Ex:
+    ```
     live_thread = LiveInputsThread(         # init before starting game
         onshutdown=stop_everything,
         commands={
@@ -23,10 +24,10 @@ class LiveInputsThread(threading.Thread):
             'connect': (bot.direct_connect, 'direct connect to [code]'),
             'A': controller.press_a,
             'moveto': (bot.move, 'move bot to [x] [y] coords'),
-            'seq': (bot.loop_inputs, 'repeat custom inputs '\
-                '... [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
+            'seq': (bot.loop_inputs, 'repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
         })
-    [...this thread is waiting and game loop is started...]
+    ```
+    >>> [...this thread is waiting and game loop is started...]
     >>> connect PLUP#123
     >>> moveto 10 40
     >>> status

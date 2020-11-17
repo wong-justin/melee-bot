@@ -34,16 +34,14 @@ def start_game(ports, live_interface=LiveGameStats(), log=True):
     &#39;&#39;&#39;Main method to fully start game.
     Command-line first asks for dolphin folder path, then game starts with args:
 
-    ports:
-        tuple: contains 4 bot instances / Nones, eg. (None, Bot(), None, None)
-
-    live_interface:
-        LiveInputsThread: externally initialized (prob with custom commands)
-        None: no live thread desired (probably for performance)
-        &lt;not given&gt;: default live thread
-
-    log:
-        bool: write game logs to file with melee.Logger if True&#39;&#39;&#39;
+    Args:
+        ports: tuple containing 4 bot instances or Nones.
+            eg. (None, Bot(), None, None)
+        live_interface: optional.
+            - LiveInputsThread: externally initialized (prob with custom commands)
+            - None: no live thread desired (probably for performance)
+            - default: normal LiveGameStats
+        log: bool, write game logs to file with melee.Logger if True (default)&#39;&#39;&#39;
 
     args = _start_command_line()
     console = melee.Console(path=args.path)
@@ -118,14 +116,19 @@ def _shutdown(console, logger):
 <dd>
 <div class="desc"><p>Main method to fully start game.
 Command-line first asks for dolphin folder path, then game starts with args:</p>
-<p>ports:
-tuple: contains 4 bot instances / Nones, eg. (None, Bot(), None, None)</p>
-<p>live_interface:
-LiveInputsThread: externally initialized (prob with custom commands)
-None: no live thread desired (probably for performance)
-<not given>: default live thread</p>
-<p>log:
-bool: write game logs to file with melee.Logger if True</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ports</code></strong></dt>
+<dd>tuple containing 4 bot instances or Nones.
+eg. (None, Bot(), None, None)</dd>
+<dt><strong><code>live_interface</code></strong></dt>
+<dd>optional.
+- LiveInputsThread: externally initialized (prob with custom commands)
+- None: no live thread desired (probably for performance)
+- default: normal LiveGameStats</dd>
+<dt><strong><code>log</code></strong></dt>
+<dd>bool, write game logs to file with melee.Logger if True (default)</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -134,16 +137,14 @@ bool: write game logs to file with melee.Logger if True</p></div>
     &#39;&#39;&#39;Main method to fully start game.
     Command-line first asks for dolphin folder path, then game starts with args:
 
-    ports:
-        tuple: contains 4 bot instances / Nones, eg. (None, Bot(), None, None)
-
-    live_interface:
-        LiveInputsThread: externally initialized (prob with custom commands)
-        None: no live thread desired (probably for performance)
-        &lt;not given&gt;: default live thread
-
-    log:
-        bool: write game logs to file with melee.Logger if True&#39;&#39;&#39;
+    Args:
+        ports: tuple containing 4 bot instances or Nones.
+            eg. (None, Bot(), None, None)
+        live_interface: optional.
+            - LiveInputsThread: externally initialized (prob with custom commands)
+            - None: no live thread desired (probably for performance)
+            - default: normal LiveGameStats
+        log: bool, write game logs to file with melee.Logger if True (default)&#39;&#39;&#39;
 
     args = _start_command_line()
     console = melee.Console(path=args.path)

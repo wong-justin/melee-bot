@@ -23,61 +23,58 @@
 </header>
 <section id="section-intro">
 <p>Wrapping melee.Button enums for easy sequences and consumption (see usage in bots).</p>
-<pre><code>Representing a single input - tuple:
-</code></pre>
-<p>(True, btn, x, y)
+<p>Representing a single input - <code>tuple</code>:
+- <code>(True, btn, x, y)</code>
 tilt_analog
-&ndash;forgot L/R, whoops. (True, btn, float) will likely be the format.&ndash;
-(True, btn)
+- !! forgot L/R, whoops. <code>(True, btn, float)</code> will likely be the format.&ndash;
+- <code>(True, btn)</code>
 press_btn
-(False, btn)
+- <code>(False, btn)</code>
 release_btn
-(False,)
+- <code>(False,)</code>
 release_all
-()
+- <code>()</code>
 no inputs this frame.</p>
-<pre><code>Inputs in a frame - tuple(tuple):
+<p>Inputs in a frame - <code>tuple(tuple)</code>:
+- <code>(single_input,)</code>
+- <code>(many,inputs,same,frame)</code></p>
+<p>A sequence of inputs, frame by frame - <code>list[tuple(tuple))]</code>:</p>
+<pre><code>four_frames_of_inputs = [
+    ((True, Button.BUTTON_MAIN, 0.5, 0), (True, Button.BUTTON_B)),
+                                    # down+b same frame
+    (),                             # wait a frame
+    ((True, Button.BUTTON_Y),),     # tap jump
+    ((False,),)                     # all Button/sticks back to default
+]
 </code></pre>
-<p>(single_input,)
-(many,inputs,same,frame)</p>
-<pre><code>A sequence of inputs, frame by frame - list[tuple(tuple))]:
-</code></pre>
-<p>four_frames_of_inputs = [
-((True, Button.BUTTON_MAIN, 0.5, 0), (True, Button.BUTTON_B)),
-# down+b same frame
-(),
-# wait a frame
-((True, Button.BUTTON_Y),),
-# tap jump
-((False,),)
-# all Button/sticks back to default
-]</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#39;&#39;&#39;Wrapping melee.Button enums for easy sequences and consumption (see usage in bots).
 
-    Representing a single input - tuple:
-(True, btn, x, y)   tilt_analog
---forgot L/R, whoops. (True, btn, float) will likely be the format.--
-(True, btn)         press_btn
-(False, btn)        release_btn
-(False,)            release_all
-()                  no inputs this frame.
+Representing a single input - `tuple`:
+    - `(True, btn, x, y)`   tilt_analog
+    - !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.--
+    - `(True, btn)`         press_btn
+    - `(False, btn)`        release_btn
+    - `(False,)`            release_all
+    - `()`                  no inputs this frame.
 
-    Inputs in a frame - tuple(tuple):
-(single_input,)
-(many,inputs,same,frame)
+Inputs in a frame - `tuple(tuple)`:
+    - `(single_input,)`
+    - `(many,inputs,same,frame)`
 
-    A sequence of inputs, frame by frame - list[tuple(tuple))]:
+A sequence of inputs, frame by frame - `list[tuple(tuple))]`:
+```
 four_frames_of_inputs = [
     ((True, Button.BUTTON_MAIN, 0.5, 0), (True, Button.BUTTON_B)),
                                     # down+b same frame
     (),                             # wait a frame
     ((True, Button.BUTTON_Y),),     # tap jump
     ((False,),)                     # all Button/sticks back to default
-]&#39;&#39;&#39;
+]
+```&#39;&#39;&#39;
 
 from melee import Button
 import random
@@ -100,9 +97,10 @@ def make_inputs(inputs, controller):
 def wait(n):
     &#39;&#39;&#39;Gives n frames of no  Use * to unpack in sequence.
     &gt;&gt;&gt; inputs = [
-        ...,
-        *wait(3),
-    ]
+    &gt;&gt;&gt;     ...,
+    &gt;&gt;&gt;     *wait(3),
+    &gt;&gt;&gt; ]
+
     &gt;&gt;&gt; [..., (), (), (),]&#39;&#39;&#39;
     return [()] * n
     # return [()for _ in range(n)]
@@ -110,9 +108,10 @@ def wait(n):
 def repeat(n, *input_frames):
     &#39;&#39;&#39;Each arg is a frame&#39;s worth of  Use * to unpack in sequence.
     &gt;&gt;&gt; inputs = [
-        *repeat(2, (down, B), (un_B,)),
-        *repeat(3, *jump_n_laser),
-    ]
+    &gt;&gt;&gt;     *repeat(2, (down, B), (un_B,)),
+    &gt;&gt;&gt;     *repeat(3, *jump_n_laser),
+    &gt;&gt;&gt; ]
+
     &gt;&gt;&gt; [(down, B), (un_B,), (down, B), (un_B,), (jump,), (laser,), (jump,) ...]&#39;&#39;&#39;
     return [*input_frames] * n
 
@@ -361,10 +360,11 @@ def dashdance():
 <div class="desc"><p>Each arg is a frame's worth of
 Use * to unpack in sequence.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; inputs = [
-    *repeat(2, (down, B), (un_B,)),
-    *repeat(3, *jump_n_laser),
-]
-&gt;&gt;&gt; [(down, B), (un_B,), (down, B), (un_B,), (jump,), (laser,), (jump,) ...]
+&gt;&gt;&gt;     *repeat(2, (down, B), (un_B,)),
+&gt;&gt;&gt;     *repeat(3, *jump_n_laser),
+&gt;&gt;&gt; ]
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; [(down, B), (un_B,), (down, B), (un_B,), (jump,), (laser,), (jump,) ...]
 </code></pre></div>
 <details class="source">
 <summary>
@@ -373,9 +373,10 @@ Use * to unpack in sequence.</p>
 <pre><code class="python">def repeat(n, *input_frames):
     &#39;&#39;&#39;Each arg is a frame&#39;s worth of  Use * to unpack in sequence.
     &gt;&gt;&gt; inputs = [
-        *repeat(2, (down, B), (un_B,)),
-        *repeat(3, *jump_n_laser),
-    ]
+    &gt;&gt;&gt;     *repeat(2, (down, B), (un_B,)),
+    &gt;&gt;&gt;     *repeat(3, *jump_n_laser),
+    &gt;&gt;&gt; ]
+
     &gt;&gt;&gt; [(down, B), (un_B,), (down, B), (un_B,), (jump,), (laser,), (jump,) ...]&#39;&#39;&#39;
     return [*input_frames] * n</code></pre>
 </details>
@@ -436,10 +437,11 @@ Use * to unpack in sequence.</p>
 <div class="desc"><p>Gives n frames of no
 Use * to unpack in sequence.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; inputs = [
-    ...,
-    *wait(3),
-]
-&gt;&gt;&gt; [..., (), (), (),]
+&gt;&gt;&gt;     ...,
+&gt;&gt;&gt;     *wait(3),
+&gt;&gt;&gt; ]
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; [..., (), (), (),]
 </code></pre></div>
 <details class="source">
 <summary>
@@ -448,9 +450,10 @@ Use * to unpack in sequence.</p>
 <pre><code class="python">def wait(n):
     &#39;&#39;&#39;Gives n frames of no  Use * to unpack in sequence.
     &gt;&gt;&gt; inputs = [
-        ...,
-        *wait(3),
-    ]
+    &gt;&gt;&gt;     ...,
+    &gt;&gt;&gt;     *wait(3),
+    &gt;&gt;&gt; ]
+
     &gt;&gt;&gt; [..., (), (), (),]&#39;&#39;&#39;
     return [()] * n</code></pre>
 </details>

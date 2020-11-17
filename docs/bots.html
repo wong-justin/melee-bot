@@ -39,8 +39,10 @@ class Bot:
     &#39;&#39;&#39;Framework for making controller inputs.
     Offline only implementation currently.
 
-    Attrs:
-        controller, character, stage&#39;&#39;&#39;
+    Attributes:
+        controller: melee.Controller
+        character: melee.Character
+        stage: melee.Stage&#39;&#39;&#39;
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -87,8 +89,8 @@ class InputsBot(Bot):
     never called directly/instantly with controller.
     First queued input will happen same frame of queueing.
 
-    Attrs:
-        queue&#39;&#39;&#39;
+    Attributes:
+        queue: list of inputs as outlined in inputs.py&#39;&#39;&#39;
 
     def __init__(self, controller, character, stage):
         super().__init__(controller, character, stage)
@@ -118,16 +120,16 @@ class InputsBot(Bot):
 class CheckBot(InputsBot):
     &#39;&#39;&#39;Adds condition checker to main loop.
 
-    Attrs:
-        when:   condition called every frame (func taking gamestate)
-            (ie trigger)
-        do:     func called when condition returns True
-            (ie on_trigger)
+    Attributes:
+        when: (ie trigger) condition called every frame (func taking gamestate)
+
+        do: (ie on_trigger) func called when condition returns True
 
     By default, stops checking upon reaching condition.
-    set_timer is example use of when and do.
+    `set_timer()` is an example of using `when` and `do`.
 
-    Eg. self.repeat(when=self.finished_inputs, do=some_func)&#39;&#39;&#39;
+    Eg.
+    `self.repeat(when=self.finished_inputs, do=some_func)`&#39;&#39;&#39;
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -180,16 +182,19 @@ class CheckBot(InputsBot):
     def finished_inputs(self, gamestate):
         &#39;&#39;&#39;A condition to loop inputs by returning True when queue is empty.
 
-        Eg. self.when = self.finished_inputs
-        self.do = &#39;&#39;&#39;
+        Eg.
+        ```
+        self.when = self.finished_inputs
+        self.do = something
+        ```&#39;&#39;&#39;
         return len(self.queue) == 0
 
 class ControllableBot(InputsBot):
     &#39;&#39;&#39;Designed to easily control externally in real time,
     eg. from live thread or perhaps something like a chat.
 
-    Attrs:
-        commands: dict of {&#39;cmd&#39;: (func, &#39;description&#39;)}
+    Attributes:
+        commands: dict of `{&#39;cmd&#39;: (func, &#39;description&#39;)}`
             See LiveInputsThread for details.&#39;&#39;&#39;
 
     def __init__(self, controller=None,
@@ -488,8 +493,15 @@ class FalcoBot(CheckBot):
 <dd>
 <div class="desc"><p>Framework for making controller inputs.
 Offline only implementation currently.</p>
-<h2 id="attrs">Attrs</h2>
-<p>controller, character, stage</p></div>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>controller</code></strong></dt>
+<dd>melee.Controller</dd>
+<dt><strong><code>character</code></strong></dt>
+<dd>melee.Character</dd>
+<dt><strong><code>stage</code></strong></dt>
+<dd>melee.Stage</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -498,8 +510,10 @@ Offline only implementation currently.</p>
     &#39;&#39;&#39;Framework for making controller inputs.
     Offline only implementation currently.
 
-    Attrs:
-        controller, character, stage&#39;&#39;&#39;
+    Attributes:
+        controller: melee.Controller
+        character: melee.Character
+        stage: melee.Stage&#39;&#39;&#39;
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -602,16 +616,17 @@ Offline only implementation currently.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Adds condition checker to main loop.</p>
-<h2 id="attrs">Attrs</h2>
-<p>when:
-condition called every frame (func taking gamestate)
-(ie trigger)
-do:
-func called when condition returns True
-(ie on_trigger)</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>when</code></strong></dt>
+<dd>(ie trigger) condition called every frame (func taking gamestate)</dd>
+<dt><strong><code>do</code></strong></dt>
+<dd>(ie on_trigger) func called when condition returns True</dd>
+</dl>
 <p>By default, stops checking upon reaching condition.
-set_timer is example use of when and do.</p>
-<p>Eg. self.repeat(when=self.finished_inputs, do=some_func)</p></div>
+<code>set_timer()</code> is an example of using <code>when</code> and <code>do</code>.</p>
+<p>Eg.
+<code>self.repeat(when=self.finished_inputs, do=some_func)</code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -619,16 +634,16 @@ set_timer is example use of when and do.</p>
 <pre><code class="python">class CheckBot(InputsBot):
     &#39;&#39;&#39;Adds condition checker to main loop.
 
-    Attrs:
-        when:   condition called every frame (func taking gamestate)
-            (ie trigger)
-        do:     func called when condition returns True
-            (ie on_trigger)
+    Attributes:
+        when: (ie trigger) condition called every frame (func taking gamestate)
+
+        do: (ie on_trigger) func called when condition returns True
 
     By default, stops checking upon reaching condition.
-    set_timer is example use of when and do.
+    `set_timer()` is an example of using `when` and `do`.
 
-    Eg. self.repeat(when=self.finished_inputs, do=some_func)&#39;&#39;&#39;
+    Eg.
+    `self.repeat(when=self.finished_inputs, do=some_func)`&#39;&#39;&#39;
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -681,8 +696,11 @@ set_timer is example use of when and do.</p>
     def finished_inputs(self, gamestate):
         &#39;&#39;&#39;A condition to loop inputs by returning True when queue is empty.
 
-        Eg. self.when = self.finished_inputs
-        self.do = &#39;&#39;&#39;
+        Eg.
+        ```
+        self.when = self.finished_inputs
+        self.do = something
+        ```&#39;&#39;&#39;
         return len(self.queue) == 0</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -719,8 +737,10 @@ stopping check when True.</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>A condition to loop inputs by returning True when queue is empty.</p>
-<p>Eg. self.when = self.finished_inputs
-self.do =</p></div>
+<p>Eg.</p>
+<pre><code>self.when = self.finished_inputs
+self.do = something
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -728,8 +748,11 @@ self.do =</p></div>
 <pre><code class="python">def finished_inputs(self, gamestate):
     &#39;&#39;&#39;A condition to loop inputs by returning True when queue is empty.
 
-    Eg. self.when = self.finished_inputs
-    self.do = &#39;&#39;&#39;
+    Eg.
+    ```
+    self.when = self.finished_inputs
+    self.do = something
+    ```&#39;&#39;&#39;
     return len(self.queue) == 0</code></pre>
 </details>
 </dd>
@@ -795,9 +818,12 @@ n frames to wait, timer condition, callback.</p></div>
 <dd>
 <div class="desc"><p>Designed to easily control externally in real time,
 eg. from live thread or perhaps something like a chat.</p>
-<h2 id="attrs">Attrs</h2>
-<p>commands: dict of {'cmd': (func, 'description')}
-See LiveInputsThread for details.</p></div>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>commands</code></strong></dt>
+<dd>dict of <code>{'cmd': (func, 'description')}</code>
+See LiveInputsThread for details.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -806,8 +832,8 @@ See LiveInputsThread for details.</p></div>
     &#39;&#39;&#39;Designed to easily control externally in real time,
     eg. from live thread or perhaps something like a chat.
 
-    Attrs:
-        commands: dict of {&#39;cmd&#39;: (func, &#39;description&#39;)}
+    Attributes:
+        commands: dict of `{&#39;cmd&#39;: (func, &#39;description&#39;)}`
             See LiveInputsThread for details.&#39;&#39;&#39;
 
     def __init__(self, controller=None,
@@ -917,16 +943,17 @@ See LiveInputsThread for details.</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Adds condition checker to main loop.</p>
-<h2 id="attrs">Attrs</h2>
-<p>when:
-condition called every frame (func taking gamestate)
-(ie trigger)
-do:
-func called when condition returns True
-(ie on_trigger)</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>when</code></strong></dt>
+<dd>(ie trigger) condition called every frame (func taking gamestate)</dd>
+<dt><strong><code>do</code></strong></dt>
+<dd>(ie on_trigger) func called when condition returns True</dd>
+</dl>
 <p>By default, stops checking upon reaching condition.
-set_timer is example use of when and do.</p>
-<p>Eg. self.repeat(when=self.finished_inputs, do=some_func)</p></div>
+<code>set_timer()</code> is an example of using <code>when</code> and <code>do</code>.</p>
+<p>Eg.
+<code>self.repeat(when=self.finished_inputs, do=some_func)</code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1256,8 +1283,11 @@ set_timer is example use of when and do.</p>
 <p>Inputs should be always put into queue,
 never called directly/instantly with controller.
 First queued input will happen same frame of queueing.</p>
-<h2 id="attrs">Attrs</h2>
-<p>queue</p></div>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>queue</code></strong></dt>
+<dd>list of inputs as outlined in inputs.py</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1269,8 +1299,8 @@ First queued input will happen same frame of queueing.</p>
     never called directly/instantly with controller.
     First queued input will happen same frame of queueing.
 
-    Attrs:
-        queue&#39;&#39;&#39;
+    Attributes:
+        queue: list of inputs as outlined in inputs.py&#39;&#39;&#39;
 
     def __init__(self, controller, character, stage):
         super().__init__(controller, character, stage)

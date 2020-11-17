@@ -41,9 +41,10 @@ class LiveInputsThread(threading.Thread):
     Used for live debugging or injecting commands to gameplay.
     Commands should not print anything themselves - just return string/data, if anything.
 
-    Commands format: {&#39;cmd&#39;: func} or better {&#39;cmd&#39;: (func, &#39;descrip/directions&#39;)}
+    Commands format: `{&#39;cmd&#39;: func}` or better `{&#39;cmd&#39;: (func, &#39;descrip/directions&#39;)}`
 
     Ex:
+    ```
     live_thread = LiveInputsThread(         # init before starting game
         onshutdown=stop_everything,
         commands={
@@ -51,10 +52,10 @@ class LiveInputsThread(threading.Thread):
             &#39;connect&#39;: (bot.direct_connect, &#39;direct connect to [code]&#39;),
             &#39;A&#39;: controller.press_a,
             &#39;moveto&#39;: (bot.move, &#39;move bot to [x] [y] coords&#39;),
-            &#39;seq&#39;: (bot.loop_inputs, &#39;repeat custom inputs &#39;\
-                &#39;... [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
-        })
-    [...this thread is waiting and game loop is started...]
+            &#39;seq&#39;: (bot.loop_inputs, &#39;repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
+            })
+    ```
+    &gt;&gt;&gt; [...this thread is waiting and game loop is started...]
     &gt;&gt;&gt; connect PLUP#123
     &gt;&gt;&gt; moveto 10 40
     &gt;&gt;&gt; status
@@ -427,21 +428,20 @@ and adding stat-tracking / printing-on-change feature.</p>
 Similar to a command line parser but streamlined experience, no flags.
 Used for live debugging or injecting commands to gameplay.
 Commands should not print anything themselves - just return string/data, if anything.</p>
-<p>Commands format: {'cmd': func} or better {'cmd': (func, 'descrip/directions')}</p>
-<p>Ex:
-live_thread = LiveInputsThread(
-# init before starting game
-onshutdown=stop_everything,
-commands={
-'status': lambda: bot.status,
-'connect': (bot.direct_connect, 'direct connect to [code]'),
-'A': controller.press_a,
-'moveto': (bot.move, 'move bot to [x] [y] coords'),
-'seq': (bot.loop_inputs, 'repeat custom inputs '
-'&hellip; [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
-})
-[&hellip;this thread is waiting and game loop is started&hellip;]</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; connect PLUP#123
+<p>Commands format: <code>{'cmd': func}</code> or better <code>{'cmd': (func, 'descrip/directions')}</code></p>
+<p>Ex:</p>
+<pre><code>live_thread = LiveInputsThread(         # init before starting game
+    onshutdown=stop_everything,
+    commands={
+        'status': lambda: bot.status,
+        'connect': (bot.direct_connect, 'direct connect to [code]'),
+        'A': controller.press_a,
+        'moveto': (bot.move, 'move bot to [x] [y] coords'),
+        'seq': (bot.loop_inputs, 'repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
+        })
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; [...this thread is waiting and game loop is started...]
+&gt;&gt;&gt; connect PLUP#123
 &gt;&gt;&gt; moveto 10 40
 &gt;&gt;&gt; status
 &gt;&gt;&gt;   Bot status: ...
@@ -459,9 +459,10 @@ commands={
     Used for live debugging or injecting commands to gameplay.
     Commands should not print anything themselves - just return string/data, if anything.
 
-    Commands format: {&#39;cmd&#39;: func} or better {&#39;cmd&#39;: (func, &#39;descrip/directions&#39;)}
+    Commands format: `{&#39;cmd&#39;: func}` or better `{&#39;cmd&#39;: (func, &#39;descrip/directions&#39;)}`
 
     Ex:
+    ```
     live_thread = LiveInputsThread(         # init before starting game
         onshutdown=stop_everything,
         commands={
@@ -469,10 +470,10 @@ commands={
             &#39;connect&#39;: (bot.direct_connect, &#39;direct connect to [code]&#39;),
             &#39;A&#39;: controller.press_a,
             &#39;moveto&#39;: (bot.move, &#39;move bot to [x] [y] coords&#39;),
-            &#39;seq&#39;: (bot.loop_inputs, &#39;repeat custom inputs &#39;\
-                &#39;... [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
-        })
-    [...this thread is waiting and game loop is started...]
+            &#39;seq&#39;: (bot.loop_inputs, &#39;repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
+            })
+    ```
+    &gt;&gt;&gt; [...this thread is waiting and game loop is started...]
     &gt;&gt;&gt; connect PLUP#123
     &gt;&gt;&gt; moveto 10 40
     &gt;&gt;&gt; status

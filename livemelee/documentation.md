@@ -5,6 +5,7 @@ from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 ```
 `python main.py "path/to/dolphin/folder"`
+
 ## Importable from `livemelee`
 - `start_game` - function handles Dolphin startup to get in-game
 - `LiveInputsThread`, `LiveGameStats` - manage user commands during gameplay

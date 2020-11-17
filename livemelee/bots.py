@@ -11,8 +11,10 @@ class Bot:
     '''Framework for making controller inputs.
     Offline only implementation currently.
 
-    Attrs:
-        controller, character, stage'''
+    Attributes:
+        controller: melee.Controller
+        character: melee.Character
+        stage: melee.Stage'''
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -59,8 +61,8 @@ class InputsBot(Bot):
     never called directly/instantly with controller.
     First queued input will happen same frame of queueing.
 
-    Attrs:
-        queue'''
+    Attributes:
+        queue: list of inputs as outlined in inputs.py'''
 
     def __init__(self, controller, character, stage):
         super().__init__(controller, character, stage)
@@ -90,16 +92,16 @@ class InputsBot(Bot):
 class CheckBot(InputsBot):
     '''Adds condition checker to main loop.
 
-    Attrs:
-        when:   condition called every frame (func taking gamestate)
-            (ie trigger)
-        do:     func called when condition returns True
-            (ie on_trigger)
+    Attributes:
+        when: (ie trigger) condition called every frame (func taking gamestate)
+
+        do: (ie on_trigger) func called when condition returns True
 
     By default, stops checking upon reaching condition.
-    set_timer is example use of when and do.
+    `set_timer()` is an example of using `when` and `do`.
 
-    Eg. self.repeat(when=self.finished_inputs, do=some_func)'''
+    Eg.
+    `self.repeat(when=self.finished_inputs, do=some_func)`'''
 
     def __init__(self, controller=None,
                  character=melee.Character.FOX,
@@ -152,16 +154,19 @@ class CheckBot(InputsBot):
     def finished_inputs(self, gamestate):
         '''A condition to loop inputs by returning True when queue is empty.
 
-        Eg. self.when = self.finished_inputs
-        self.do = '''
+        Eg.
+        ```
+        self.when = self.finished_inputs
+        self.do = something
+        ```'''
         return len(self.queue) == 0
 
 class ControllableBot(InputsBot):
     '''Designed to easily control externally in real time,
     eg. from live thread or perhaps something like a chat.
 
-    Attrs:
-        commands: dict of {'cmd': (func, 'description')}
+    Attributes:
+        commands: dict of `{'cmd': (func, 'description')}`
             See LiveInputsThread for details.'''
 
     def __init__(self, controller=None,

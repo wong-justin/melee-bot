@@ -1,25 +1,27 @@
 '''Wrapping melee.Button enums for easy sequences and consumption (see usage in bots).
 
-    Representing a single input - tuple:
-(True, btn, x, y)   tilt_analog
---forgot L/R, whoops. (True, btn, float) will likely be the format.--
-(True, btn)         press_btn
-(False, btn)        release_btn
-(False,)            release_all
-()                  no inputs this frame.
+Representing a single input - `tuple`:
+    - `(True, btn, x, y)`   tilt_analog
+    - !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.--
+    - `(True, btn)`         press_btn
+    - `(False, btn)`        release_btn
+    - `(False,)`            release_all
+    - `()`                  no inputs this frame.
 
-    Inputs in a frame - tuple(tuple):
-(single_input,)
-(many,inputs,same,frame)
+Inputs in a frame - `tuple(tuple)`:
+    - `(single_input,)`
+    - `(many,inputs,same,frame)`
 
-    A sequence of inputs, frame by frame - list[tuple(tuple))]:
+A sequence of inputs, frame by frame - `list[tuple(tuple))]`:
+```
 four_frames_of_inputs = [
     ((True, Button.BUTTON_MAIN, 0.5, 0), (True, Button.BUTTON_B)),
                                     # down+b same frame
     (),                             # wait a frame
     ((True, Button.BUTTON_Y),),     # tap jump
     ((False,),)                     # all Button/sticks back to default
-]'''
+]
+```'''
 
 from melee import Button
 import random
@@ -40,11 +42,12 @@ def make_inputs(inputs, controller):
     # []  frame of nothing
 
 def wait(n):
-    '''Gives n frames of no  Use * to unpack in sequence.
+    '''Gives n frames of no inputs. Use * to unpack in sequence.
     >>> inputs = [
-        ...,
-        *wait(3),
-    ]
+    >>>     ...,
+    >>>     *wait(3),
+    >>> ]
+
     >>> [..., (), (), (),]'''
     return [()] * n
     # return [()for _ in range(n)]
@@ -52,9 +55,10 @@ def wait(n):
 def repeat(n, *input_frames):
     '''Each arg is a frame's worth of  Use * to unpack in sequence.
     >>> inputs = [
-        *repeat(2, (down, B), (un_B,)),
-        *repeat(3, *jump_n_laser),
-    ]
+    >>>     *repeat(2, (down, B), (un_B,)),
+    >>>     *repeat(3, *jump_n_laser),
+    >>> ]
+
     >>> [(down, B), (un_B,), (down, B), (un_B,), (jump,), (laser,), (jump,) ...]'''
     return [*input_frames] * n
 
