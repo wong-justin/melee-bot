@@ -1,6 +1,6 @@
 '''Demo of input making, bot creation, and game start.'''
 
-from livemelee import start_game, Bot, CheckBot, LiveGameStats, buttons
+from livemelee import start_game, Bot, CheckBot, LiveGameStats, utils
 from livemelee.inputs import *  # alternative to `from livemelee import Inputs`
                                 #  and then using Inputs.down, etc
 # one line demo!
@@ -21,7 +21,7 @@ class ReformBot(CheckBot):
         super().__init__(*args, **kwargs)
 
         self.commands = {          # user calls these midgame in shell by keypress
-            'c': (lambda: buttons(self.controller.current), # logging func
+            'c': (lambda: utils.loggable_controller(self.controller.current), # logging func
                   'inspect controller'),                    # descrip
             'reform': self.stop,   # another cmd: func - no descrip is ok
         }

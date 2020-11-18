@@ -2,7 +2,7 @@ import melee
 import random
 import time
 from . import inputs as Inputs
-from . import stat as Stat
+from . import utils
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
@@ -28,7 +28,7 @@ class Bot:
 
         # if gamestate.menu_state in (melee.Menu.IN_GAME,
         #                             melee.Menu.SUDDEN_DEATH):
-        if Stat.in_game(gamestate):
+        if utils.in_game(gamestate):
             self.play_frame(gamestate)  # rand note, paused wont advance frame
         else:
             self.menu_nav(gamestate)
@@ -255,7 +255,7 @@ class FalcoBot(CheckBot):
                     do=self.jump)
 
     def can_jump(self, gamestate):
-        if Stat.grounded(gamestate):
+        if utils.grounded(gamestate):
             if self.jumped:
                 return False
             else:
@@ -296,7 +296,7 @@ class FalcoBot(CheckBot):
                 return True
             else:
                 self.timer -= 1
-                if not Stat.grounded(gamestate):
+                if not utils.grounded(gamestate):
                     self.jumped = True  # should be success but just let timer tick
             return False
 
@@ -313,7 +313,7 @@ class FalcoBot(CheckBot):
         # keeps setting queue until taunting actually happens
 
         # self.last_when = self.when
-        self.when = Stat.not_taunting
+        self.when = utils.not_taunting
         self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])
 
     def ragequit(self): #, angry_misinput=True):
