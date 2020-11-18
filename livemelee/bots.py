@@ -1,3 +1,5 @@
+'''Collection of bot classes to extend.'''
+
 import melee
 import random
 import time

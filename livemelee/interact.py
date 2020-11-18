@@ -1,3 +1,5 @@
+'''Manage user commands during gameplay.'''
+
 import threading
 import argparse
 import signal

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>livemelee.startup API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Create entry point to init everything and start Dolphin." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,14 @@
 <h1 class="title">Module <code>livemelee.startup</code></h1>
 </header>
 <section id="section-intro">
+<p>Create entry point to init everything and start Dolphin.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import argparse
+<pre><code class="python">&#39;&#39;&#39;Create entry point to init everything and start Dolphin.&#39;&#39;&#39;
+
+import argparse
 import melee
 from .interact import LiveGameStats
 
@@ -37,13 +40,13 @@ def start_game(ports, live_interface=LiveGameStats(), log=True):
     Args:
         ports: tuple containing 4 bot instances or Nones.
 
-            eg. `(None, Bot(), None, None)`
+            eg. `(None, my_bot, None, None)`
 
         live_interface: optional.
 
-            - LiveInputsThread: externally initialized with custom commands.
+            - `LiveInputsThread`: externally initialized with custom commands.
             Don&#39;t worry about onshutdown; it will be taken care of in this method.
-            - None: no live thread desired (probably for performance)
+            - `None`: no live thread desired (probably for performance)
             - default: normal LiveGameStat
 
         log: bool, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
@@ -126,15 +129,15 @@ Command-line first asks for dolphin folder path, then game starts with args:</p>
 <dt><strong><code>ports</code></strong></dt>
 <dd>
 <p>tuple containing 4 bot instances or Nones.</p>
-<p>eg. <code>(None, Bot(), None, None)</code></p>
+<p>eg. <code>(None, my_bot, None, None)</code></p>
 </dd>
 <dt><strong><code>live_interface</code></strong></dt>
 <dd>
 <p>optional.</p>
 <ul>
-<li>LiveInputsThread: externally initialized with custom commands.
+<li><code>LiveInputsThread</code>: externally initialized with custom commands.
 Don't worry about onshutdown; it will be taken care of in this method.</li>
-<li>None: no live thread desired (probably for performance)</li>
+<li><code>None</code>: no live thread desired (probably for performance)</li>
 <li>default: normal LiveGameStat</li>
 </ul>
 </dd>
@@ -152,13 +155,13 @@ Don't worry about onshutdown; it will be taken care of in this method.</li>
     Args:
         ports: tuple containing 4 bot instances or Nones.
 
-            eg. `(None, Bot(), None, None)`
+            eg. `(None, my_bot, None, None)`
 
         live_interface: optional.
 
-            - LiveInputsThread: externally initialized with custom commands.
+            - `LiveInputsThread`: externally initialized with custom commands.
             Don&#39;t worry about onshutdown; it will be taken care of in this method.
-            - None: no live thread desired (probably for performance)
+            - `None`: no live thread desired (probably for performance)
             - default: normal LiveGameStat
 
         log: bool, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;

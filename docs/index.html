@@ -122,7 +122,7 @@ __all__ = [
 <dl>
 <dt><code class="name"><a title="livemelee.bots" href="bots.html">livemelee.bots</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Collection of bot classes to extend.</p></div>
 </dd>
 <dt><code class="name"><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code></dt>
 <dd>
@@ -130,11 +130,11 @@ __all__ = [
 </dd>
 <dt><code class="name"><a title="livemelee.interact" href="interact.html">livemelee.interact</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Manage user commands during gameplay.</p></div>
 </dd>
 <dt><code class="name"><a title="livemelee.startup" href="startup.html">livemelee.startup</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Create entry point to init everything and start Dolphin.</p></div>
 </dd>
 <dt><code class="name"><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code></dt>
 <dd>
@@ -158,15 +158,15 @@ Command-line first asks for dolphin folder path, then game starts with args:</p>
 <dt><strong><code>ports</code></strong></dt>
 <dd>
 <p>tuple containing 4 bot instances or Nones.</p>
-<p>eg. <code>(None, <a title="livemelee.Bot" href="#livemelee.Bot">Bot</a>, None, None)</code></p>
+<p>eg. <code>(None, my_bot, None, None)</code></p>
 </dd>
 <dt><strong><code>live_interface</code></strong></dt>
 <dd>
 <p>optional.</p>
 <ul>
-<li>LiveInputsThread: externally initialized with custom commands.
+<li><code><a title="livemelee.LiveInputsThread" href="#livemelee.LiveInputsThread">LiveInputsThread</a></code>: externally initialized with custom commands.
 Don't worry about onshutdown; it will be taken care of in this method.</li>
-<li>None: no live thread desired (probably for performance)</li>
+<li><code>None</code>: no live thread desired (probably for performance)</li>
 <li>default: normal LiveGameStat</li>
 </ul>
 </dd>
@@ -184,13 +184,13 @@ Don't worry about onshutdown; it will be taken care of in this method.</li>
     Args:
         ports: tuple containing 4 bot instances or Nones.
 
-            eg. `(None, Bot(), None, None)`
+            eg. `(None, my_bot, None, None)`
 
         live_interface: optional.
 
-            - LiveInputsThread: externally initialized with custom commands.
+            - `LiveInputsThread`: externally initialized with custom commands.
             Don&#39;t worry about onshutdown; it will be taken care of in this method.
-            - None: no live thread desired (probably for performance)
+            - `None`: no live thread desired (probably for performance)
             - default: normal LiveGameStat
 
         log: bool, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
@@ -977,8 +977,8 @@ Commands should not print anything themselves - just return string/data, if anyt
         'seq': (bot.loop_inputs, 'repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
     })
 </code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; [...this thread is waiting and game loop is started...]
-&gt;&gt;&gt; connect PLUP#123
+<p>[&hellip;this thread is waiting and game loop is started&hellip;]</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; connect PLUP#123
 &gt;&gt;&gt; moveto 10 40
 &gt;&gt;&gt; status
 &gt;&gt;&gt;   Bot status: ...
@@ -1010,7 +1010,7 @@ Commands should not print anything themselves - just return string/data, if anyt
             &#39;seq&#39;: (bot.loop_inputs, &#39;repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
         })
     ```
-    &gt;&gt;&gt; [...this thread is waiting and game loop is started...]
+    [...this thread is waiting and game loop is started...]
     &gt;&gt;&gt; connect PLUP#123
     &gt;&gt;&gt; moveto 10 40
     &gt;&gt;&gt; status

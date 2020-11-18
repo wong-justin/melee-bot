@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>livemelee.interact API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Manage user commands during gameplay." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,14 @@
 <h1 class="title">Module <code>livemelee.interact</code></h1>
 </header>
 <section id="section-intro">
+<p>Manage user commands during gameplay.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import threading
+<pre><code class="python">&#39;&#39;&#39;Manage user commands during gameplay.&#39;&#39;&#39;
+
+import threading
 import argparse
 import signal
 from . import utils
@@ -55,7 +58,7 @@ class LiveInputsThread(threading.Thread):
             &#39;seq&#39;: (bot.loop_inputs, &#39;repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
         })
     ```
-    &gt;&gt;&gt; [...this thread is waiting and game loop is started...]
+    [...this thread is waiting and game loop is started...]
     &gt;&gt;&gt; connect PLUP#123
     &gt;&gt;&gt; moveto 10 40
     &gt;&gt;&gt; status
@@ -440,8 +443,8 @@ Commands should not print anything themselves - just return string/data, if anyt
         'seq': (bot.loop_inputs, 'repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
     })
 </code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; [...this thread is waiting and game loop is started...]
-&gt;&gt;&gt; connect PLUP#123
+<p>[&hellip;this thread is waiting and game loop is started&hellip;]</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; connect PLUP#123
 &gt;&gt;&gt; moveto 10 40
 &gt;&gt;&gt; status
 &gt;&gt;&gt;   Bot status: ...
@@ -473,7 +476,7 @@ Commands should not print anything themselves - just return string/data, if anyt
             &#39;seq&#39;: (bot.loop_inputs, &#39;repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
         })
     ```
-    &gt;&gt;&gt; [...this thread is waiting and game loop is started...]
+    [...this thread is waiting and game loop is started...]
     &gt;&gt;&gt; connect PLUP#123
     &gt;&gt;&gt; moveto 10 40
     &gt;&gt;&gt; status

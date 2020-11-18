@@ -1,3 +1,5 @@
+'''Create entry point to init everything and start Dolphin.'''
+
 import argparse
 import melee
 from .interact import LiveGameStats
