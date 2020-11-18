@@ -28,8 +28,8 @@
 </summary>
 <pre><code class="python">import threading
 import argparse
-from . import Stat
 import signal
+from . import utils
 
 BREAK_FLAG = -2
 EXTRA_ARGS = &#39;extra_args&#39;
@@ -194,13 +194,13 @@ class LiveGameStats(LiveInputsThread):
 
         stats = {cmd: ( self._with_gamestate(func), descrip )
              for cmd, (func, descrip) in {
-                &#39;f&#39;: (Stat.frame_num, &#39;frame num&#39;),
-                &#39;p&#39;: (Stat.percents, &#39;percents&#39;),
-                &#39;d&#39;: (Stat.distance, &#39;distance&#39;),
-                &#39;a&#39;: (Stat.actions, &#39;action states&#39;),
-                &#39;g&#39;: (Stat.gamestate, &#39;gamestate&#39;),
-                &#39;m&#39;: (Stat.menu, &#39;menu&#39;),
-                &#39;stocks&#39;: (Stat.stocks, &#39;stocks&#39;),
+                &#39;f&#39;: (utils.frame_num, &#39;frame num&#39;),
+                &#39;p&#39;: (utils.percents, &#39;percents&#39;),
+                &#39;d&#39;: (utils.distance, &#39;distance&#39;),
+                &#39;a&#39;: (utils.actions, &#39;action states&#39;),
+                &#39;g&#39;: (utils.gamestate, &#39;gamestate&#39;),
+                &#39;m&#39;: (utils.menu, &#39;menu&#39;),
+                &#39;stocks&#39;: (utils.stocks, &#39;stocks&#39;),
              }.items()
         }
         stats.update({   # don&#39;t need gamestate
@@ -229,7 +229,7 @@ class LiveGameStats(LiveInputsThread):
         self._last_gamestate = gamestate
 
         # update any cumulative stats
-        if Stat.in_game(gamestate):   # game started
+        if utils.in_game(gamestate):   # game started
             self._update_stock_dur(gamestate)
 
         if self._tracker:
@@ -310,13 +310,13 @@ and adding stat-tracking / printing-on-change feature.</p>
 
         stats = {cmd: ( self._with_gamestate(func), descrip )
              for cmd, (func, descrip) in {
-                &#39;f&#39;: (Stat.frame_num, &#39;frame num&#39;),
-                &#39;p&#39;: (Stat.percents, &#39;percents&#39;),
-                &#39;d&#39;: (Stat.distance, &#39;distance&#39;),
-                &#39;a&#39;: (Stat.actions, &#39;action states&#39;),
-                &#39;g&#39;: (Stat.gamestate, &#39;gamestate&#39;),
-                &#39;m&#39;: (Stat.menu, &#39;menu&#39;),
-                &#39;stocks&#39;: (Stat.stocks, &#39;stocks&#39;),
+                &#39;f&#39;: (utils.frame_num, &#39;frame num&#39;),
+                &#39;p&#39;: (utils.percents, &#39;percents&#39;),
+                &#39;d&#39;: (utils.distance, &#39;distance&#39;),
+                &#39;a&#39;: (utils.actions, &#39;action states&#39;),
+                &#39;g&#39;: (utils.gamestate, &#39;gamestate&#39;),
+                &#39;m&#39;: (utils.menu, &#39;menu&#39;),
+                &#39;stocks&#39;: (utils.stocks, &#39;stocks&#39;),
              }.items()
         }
         stats.update({   # don&#39;t need gamestate
@@ -345,7 +345,7 @@ and adding stat-tracking / printing-on-change feature.</p>
         self._last_gamestate = gamestate
 
         # update any cumulative stats
-        if Stat.in_game(gamestate):   # game started
+        if utils.in_game(gamestate):   # game started
             self._update_stock_dur(gamestate)
 
         if self._tracker:
@@ -399,7 +399,7 @@ and adding stat-tracking / printing-on-change feature.</p>
     self._last_gamestate = gamestate
 
     # update any cumulative stats
-    if Stat.in_game(gamestate):   # game started
+    if utils.in_game(gamestate):   # game started
         self._update_stock_dur(gamestate)
 
     if self._tracker:

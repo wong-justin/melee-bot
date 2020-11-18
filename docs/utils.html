@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
-<title>livemelee.stat API documentation</title>
-<meta name="description" content="Group of functions returning helpful stats, given melee.Gamestate …" />
+<title>livemelee.utils API documentation</title>
+<meta name="description" content="Group of functions returning helpful stats, mainly info from gamestates …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,34 +19,42 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>livemelee.stat</code></h1>
+<h1 class="title">Module <code>livemelee.utils</code></h1>
 </header>
 <section id="section-intro">
-<p>Group of functions returning helpful stats, given melee.Gamestate.</p>
-<p>Two kinds:
+<p>Group of functions returning helpful stats, mainly info from gamestates.</p>
+<p>Two kinds of gamestate functions:
 conditions returning bools, and
 pretty printers returning strings.</p>
-<p>These would be nice additions to melee.Gamestate,
+<p>Also included is a controller state wrapper: loggable_controller().</p>
+<p>These would be nice additions to the libmelee package,
 but we make do with this patchy submodule.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; stat_output = Stat.func(real_gamestate_obj)
+<pre><code class="language-python-repl">&gt;&gt;&gt; stat_output = utils.func(real_gamestate_obj)
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print( utils.loggable_controller(controller.current) )
 </code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#39;&#39;&#39;Group of functions returning helpful stats, given melee.Gamestate.
+<pre><code class="python">&#39;&#39;&#39;Group of functions returning helpful stats, mainly info from gamestates.
 
-Two kinds:
+Two kinds of gamestate functions:
     conditions returning bools, and
     pretty printers returning strings.
 
-These would be nice additions to melee.Gamestate,
+Also included is a controller state wrapper: loggable_controller().
+
+These would be nice additions to the libmelee package,
 but we make do with this patchy submodule.
 
-&gt;&gt;&gt; stat_output = Stat.func(real_gamestate_obj)&#39;&#39;&#39;
+&gt;&gt;&gt; stat_output = utils.func(real_gamestate_obj)
 
-from melee import Menu, Action  # enums
+&gt;&gt;&gt; print( utils.loggable_controller(controller.current) )&#39;&#39;&#39;
 
+from melee import ControllerState, Button, Menu, Action
+
+### gamestate utils
 
 ### conditions
 # todo: replace hard coded ports
@@ -64,7 +72,6 @@ def not_taunting(gamestate):
                                               Action.TAUNT_RIGHT)
 def grounded(gamestate):
     return gamestate.player[2].on_ground
-
 
 ### pretty printing
 
@@ -84,12 +91,69 @@ def distance(g):
 def percents(g):
     return &#39;Percents: {}%  {}%&#39;.format(g.player[1].percent,
                                      g.player[2].percent)
+
+# def percents(g, my_port, other_port):
+#     return &#39;Percents: {}%  {}%&#39;.format(g.player[my_port].percent,
+#                                        g.player[other_port].percent)
+
 def actions(g):
     return &#39;Action states: {}  {}&#39;.format(g.player[1].action,
                                         g.player[2].action)
 def stocks(g):
     return &#39;Stocks: {}  {}&#39;.format(g.player[1].stock,
-                                 g.player[2].stock)</code></pre>
+                                 g.player[2].stock)
+
+
+### controller wrapper
+
+class _ComparableState(ControllerState):
+    &#39;&#39;&#39;Extending with comparisons and smaller debug output.&#39;&#39;&#39;
+
+    def __init__(self, existing):
+        # constructor copying a melee.ControllerState
+        self.button = {**existing.button}   # deepcopy for dict
+        self.main_stick = existing.main_stick
+        self.c_stick = existing.c_stick
+        self.l_shoulder = existing.l_shoulder
+        self.r_shoulder = existing.r_shoulder
+
+    def active(self):
+        # returns set of buttons(+sticks) not in default position
+        # digitals
+        active = {btn for btn, pressed in self.button.items() if pressed}
+        # analogs
+        if not self.main_stick == (.5, .5): # perhaps rare float comparison error? not important now
+            active.add(Button.BUTTON_MAIN)
+        if not self.c_stick == (.5, .5):
+            active.add(Button.BUTTON_C)
+        if not self.l_shoulder == 0:
+            active.add(Button.BUTTON_L)
+        if not self.r_shoulder == 0:
+            active.add(Button.BUTTON_R)
+        return active
+
+    def __str__(self):
+        btns = self.active()
+        return &#39; &#39;.join(str(b) for b in btns) if btns else &#39;neutral&#39;
+        # return &#39; &#39;.join(&#39;{}:{}&#39;.format(btn,pressed) for btn,pressed in self.button.items())
+
+    def __eq__(self, other):
+        # any buttons in different state?
+        # should also compare stick positions (and then L/R amount) but oh well
+        if isinstance(other, _ComparableState):
+            return len(self - other) == 0
+        return False
+
+    def __sub__(self, other):
+        return self.active() - other.active()
+
+def loggable_controller(controller_state):
+    &#39;&#39;&#39;Returns comparable controller state with smaller debug output.
+
+    &gt;&gt;&gt; print( loggable_controller(controller.current) )
+    &gt;&gt;&gt; print(( loggable_controller(controller.current) ==
+    &gt;&gt;&gt;         buttons(controller.prev) ))&#39;&#39;&#39;
+    return _ComparableState(controller_state)</code></pre>
 </details>
 </section>
 <section>
@@ -99,7 +163,7 @@ def stocks(g):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="livemelee.stat.actions"><code class="name flex">
+<dt id="livemelee.utils.actions"><code class="name flex">
 <span>def <span class="ident">actions</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -113,7 +177,7 @@ def stocks(g):
                                         g.player[2].action)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.distance"><code class="name flex">
+<dt id="livemelee.utils.distance"><code class="name flex">
 <span>def <span class="ident">distance</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -126,7 +190,7 @@ def stocks(g):
     return &#39;Distance: {:4f}&#39;.format(g.distance)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.frame_num"><code class="name flex">
+<dt id="livemelee.utils.frame_num"><code class="name flex">
 <span>def <span class="ident">frame_num</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -139,7 +203,7 @@ def stocks(g):
     return &#39;Frame num: {}&#39;.format(g.frame)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.gamestate"><code class="name flex">
+<dt id="livemelee.utils.gamestate"><code class="name flex">
 <span>def <span class="ident">gamestate</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -152,7 +216,7 @@ def stocks(g):
     return &#39;Gamestate: {}&#39;.format(g)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.grounded"><code class="name flex">
+<dt id="livemelee.utils.grounded"><code class="name flex">
 <span>def <span class="ident">grounded</span></span>(<span>gamestate)</span>
 </code></dt>
 <dd>
@@ -165,7 +229,7 @@ def stocks(g):
     return gamestate.player[2].on_ground</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.in_game"><code class="name flex">
+<dt id="livemelee.utils.in_game"><code class="name flex">
 <span>def <span class="ident">in_game</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -178,7 +242,29 @@ def stocks(g):
     return g.menu_state in (Menu.IN_GAME, Menu.SUDDEN_DEATH)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.menu"><code class="name flex">
+<dt id="livemelee.utils.loggable_controller"><code class="name flex">
+<span>def <span class="ident">loggable_controller</span></span>(<span>controller_state)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns comparable controller state with smaller debug output.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print( loggable_controller(controller.current) )
+&gt;&gt;&gt; print(( loggable_controller(controller.current) ==
+&gt;&gt;&gt;         buttons(controller.prev) ))
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def loggable_controller(controller_state):
+    &#39;&#39;&#39;Returns comparable controller state with smaller debug output.
+
+    &gt;&gt;&gt; print( loggable_controller(controller.current) )
+    &gt;&gt;&gt; print(( loggable_controller(controller.current) ==
+    &gt;&gt;&gt;         buttons(controller.prev) ))&#39;&#39;&#39;
+    return _ComparableState(controller_state)</code></pre>
+</details>
+</dd>
+<dt id="livemelee.utils.menu"><code class="name flex">
 <span>def <span class="ident">menu</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -191,7 +277,7 @@ def stocks(g):
     return &#39;Menu: {}&#39;.format(g.menu_state)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.not_taunting"><code class="name flex">
+<dt id="livemelee.utils.not_taunting"><code class="name flex">
 <span>def <span class="ident">not_taunting</span></span>(<span>gamestate)</span>
 </code></dt>
 <dd>
@@ -205,7 +291,7 @@ def stocks(g):
                                               Action.TAUNT_RIGHT)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.percents"><code class="name flex">
+<dt id="livemelee.utils.percents"><code class="name flex">
 <span>def <span class="ident">percents</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -219,7 +305,7 @@ def stocks(g):
                                      g.player[2].percent)</code></pre>
 </details>
 </dd>
-<dt id="livemelee.stat.stocks"><code class="name flex">
+<dt id="livemelee.utils.stocks"><code class="name flex">
 <span>def <span class="ident">stocks</span></span>(<span>g)</span>
 </code></dt>
 <dd>
@@ -251,16 +337,17 @@ def stocks(g):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="livemelee.stat.actions" href="#livemelee.stat.actions">actions</a></code></li>
-<li><code><a title="livemelee.stat.distance" href="#livemelee.stat.distance">distance</a></code></li>
-<li><code><a title="livemelee.stat.frame_num" href="#livemelee.stat.frame_num">frame_num</a></code></li>
-<li><code><a title="livemelee.stat.gamestate" href="#livemelee.stat.gamestate">gamestate</a></code></li>
-<li><code><a title="livemelee.stat.grounded" href="#livemelee.stat.grounded">grounded</a></code></li>
-<li><code><a title="livemelee.stat.in_game" href="#livemelee.stat.in_game">in_game</a></code></li>
-<li><code><a title="livemelee.stat.menu" href="#livemelee.stat.menu">menu</a></code></li>
-<li><code><a title="livemelee.stat.not_taunting" href="#livemelee.stat.not_taunting">not_taunting</a></code></li>
-<li><code><a title="livemelee.stat.percents" href="#livemelee.stat.percents">percents</a></code></li>
-<li><code><a title="livemelee.stat.stocks" href="#livemelee.stat.stocks">stocks</a></code></li>
+<li><code><a title="livemelee.utils.actions" href="#livemelee.utils.actions">actions</a></code></li>
+<li><code><a title="livemelee.utils.distance" href="#livemelee.utils.distance">distance</a></code></li>
+<li><code><a title="livemelee.utils.frame_num" href="#livemelee.utils.frame_num">frame_num</a></code></li>
+<li><code><a title="livemelee.utils.gamestate" href="#livemelee.utils.gamestate">gamestate</a></code></li>
+<li><code><a title="livemelee.utils.grounded" href="#livemelee.utils.grounded">grounded</a></code></li>
+<li><code><a title="livemelee.utils.in_game" href="#livemelee.utils.in_game">in_game</a></code></li>
+<li><code><a title="livemelee.utils.loggable_controller" href="#livemelee.utils.loggable_controller">loggable_controller</a></code></li>
+<li><code><a title="livemelee.utils.menu" href="#livemelee.utils.menu">menu</a></code></li>
+<li><code><a title="livemelee.utils.not_taunting" href="#livemelee.utils.not_taunting">not_taunting</a></code></li>
+<li><code><a title="livemelee.utils.percents" href="#livemelee.utils.percents">percents</a></code></li>
+<li><code><a title="livemelee.utils.stocks" href="#livemelee.utils.stocks">stocks</a></code></li>
 </ul>
 </li>
 </ul>

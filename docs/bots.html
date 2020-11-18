@@ -29,8 +29,8 @@
 <pre><code class="python">import melee
 import random
 import time
-from . import Inputs
-from . import Stat
+from . import inputs as Inputs
+from . import utils
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
@@ -56,7 +56,7 @@ class Bot:
 
         # if gamestate.menu_state in (melee.Menu.IN_GAME,
         #                             melee.Menu.SUDDEN_DEATH):
-        if Stat.in_game(gamestate):
+        if utils.in_game(gamestate):
             self.play_frame(gamestate)  # rand note, paused wont advance frame
         else:
             self.menu_nav(gamestate)
@@ -283,7 +283,7 @@ class FalcoBot(CheckBot):
                     do=self.jump)
 
     def can_jump(self, gamestate):
-        if Stat.grounded(gamestate):
+        if utils.grounded(gamestate):
             if self.jumped:
                 return False
             else:
@@ -324,7 +324,7 @@ class FalcoBot(CheckBot):
                 return True
             else:
                 self.timer -= 1
-                if not Stat.grounded(gamestate):
+                if not utils.grounded(gamestate):
                     self.jumped = True  # should be success but just let timer tick
             return False
 
@@ -341,7 +341,7 @@ class FalcoBot(CheckBot):
         # keeps setting queue until taunting actually happens
 
         # self.last_when = self.when
-        self.when = Stat.not_taunting
+        self.when = utils.not_taunting
         self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])
 
     def ragequit(self): #, angry_misinput=True):
@@ -361,33 +361,16 @@ class FalcoBot(CheckBot):
 
 # under construction:
 
-# class MultiCheckBot(InputsBot):
-#
-#     FINISH_NOW = 1
-#     STOP_CHECKING = 2
-#     KEEP_CHECKING = 3
-#
-#     def __init__(self, controller,
-#                  character=melee.Character.FALCO,
-#                  stage=melee.Stage.FINAL_DESTINATION):
-#         super().__init__(controller, character, stage)
-#
-#         self.checks = {}
-#
-#     def check_frame(self, gamestate):
-#         remove = []
-#         for condition, do in self.checks.items():
-#             if condition(self, gamestate):
-#                 retval = do()
-#                 if retval == MultiCheckBot.FINISH_NOW:
-#                     return
-#                 elif retval == MultiCheckBot.STOP_CHECKING:
-#                     remove.append(condition)
-#         for condition in remove:
-#             del self.checks[condition]
-#
-#     def something(self):
-#         pass</code></pre>
+def _with_ports(self, func):
+    def stat_with_ports(gamestate):
+        return func(gamestate, self.my_port, self.opp_port)
+    return stat_with_ports
+
+def detect_ports(self, gamestate):
+    # melee.GameState.port_detector(gamestate, self.character, self.costume)
+    players = gamestate.player.items()
+
+    #</code></pre>
 </details>
 </section>
 <section>
@@ -408,6 +391,20 @@ class FalcoBot(CheckBot):
 </summary>
 <pre><code class="python">def always(gamestate):
     return True</code></pre>
+</details>
+</dd>
+<dt id="livemelee.bots.detect_ports"><code class="name flex">
+<span>def <span class="ident">detect_ports</span></span>(<span>self, gamestate)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def detect_ports(self, gamestate):
+    # melee.GameState.port_detector(gamestate, self.character, self.costume)
+    players = gamestate.player.items()</code></pre>
 </details>
 </dd>
 <dt id="livemelee.bots.never"><code class="name flex">
@@ -469,7 +466,7 @@ Offline only implementation currently.</p>
 
         # if gamestate.menu_state in (melee.Menu.IN_GAME,
         #                             melee.Menu.SUDDEN_DEATH):
-        if Stat.in_game(gamestate):
+        if utils.in_game(gamestate):
             self.play_frame(gamestate)  # rand note, paused wont advance frame
         else:
             self.menu_nav(gamestate)
@@ -509,7 +506,7 @@ Offline only implementation currently.</p>
 
     # if gamestate.menu_state in (melee.Menu.IN_GAME,
     #                             melee.Menu.SUDDEN_DEATH):
-    if Stat.in_game(gamestate):
+    if utils.in_game(gamestate):
         self.play_frame(gamestate)  # rand note, paused wont advance frame
     else:
         self.menu_nav(gamestate)</code></pre>
@@ -928,7 +925,7 @@ See LiveInputsThread for details.</dd>
                     do=self.jump)
 
     def can_jump(self, gamestate):
-        if Stat.grounded(gamestate):
+        if utils.grounded(gamestate):
             if self.jumped:
                 return False
             else:
@@ -969,7 +966,7 @@ See LiveInputsThread for details.</dd>
                 return True
             else:
                 self.timer -= 1
-                if not Stat.grounded(gamestate):
+                if not utils.grounded(gamestate):
                     self.jumped = True  # should be success but just let timer tick
             return False
 
@@ -986,7 +983,7 @@ See LiveInputsThread for details.</dd>
         # keeps setting queue until taunting actually happens
 
         # self.last_when = self.when
-        self.when = Stat.not_taunting
+        self.when = utils.not_taunting
         self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])
 
     def ragequit(self): #, angry_misinput=True):
@@ -1022,7 +1019,7 @@ See LiveInputsThread for details.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def can_jump(self, gamestate):
-    if Stat.grounded(gamestate):
+    if utils.grounded(gamestate):
         if self.jumped:
             return False
         else:
@@ -1063,7 +1060,7 @@ See LiveInputsThread for details.</dd>
             return True
         else:
             self.timer -= 1
-            if not Stat.grounded(gamestate):
+            if not utils.grounded(gamestate):
                 self.jumped = True  # should be success but just let timer tick
         return False
 
@@ -1194,7 +1191,7 @@ See LiveInputsThread for details.</dd>
     # keeps setting queue until taunting actually happens
 
     # self.last_when = self.when
-    self.when = Stat.not_taunting
+    self.when = utils.not_taunting
     self.do = lambda: self.perform([(Inputs.release,), *Inputs.taunt()])</code></pre>
 </details>
 </dd>
@@ -1359,6 +1356,7 @@ Useful in lambdas where assignment is not allowed.</p></div>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="livemelee.bots.always" href="#livemelee.bots.always">always</a></code></li>
+<li><code><a title="livemelee.bots.detect_ports" href="#livemelee.bots.detect_ports">detect_ports</a></code></li>
 <li><code><a title="livemelee.bots.never" href="#livemelee.bots.never">never</a></code></li>
 </ul>
 </li>
