@@ -1,6 +1,6 @@
 import threading
 import argparse
-from . import Stat
+from . import stat as Stat
 import signal
 
 BREAK_FLAG = -2

@@ -37,15 +37,17 @@ ___
 #### Todo
 
 - [ ] Generalize for other ports and online connection
+  - [ ] investigate same-char-costume port detection
 - [ ] Unit tests
 - [ ] Test on Linux, OSX
 - [ ] refactor misc tidbits as utils submodule?
 - [ ] Round out inputs module
   - [ ] switch arg order in repeat()
+  - [ ] capitalize button constants?
 - [ ] use command line to set dolphin path as local config?
 - [ ] update demo gif with stat tracking
 - [ ] clean up docs formatting
-  - [ ] replace documentation.md with formatted docstring in __init__
+  - [ ] replace documentation.md with formatted docstring in livemelee__init__
 - [ ] Make a semi-playable bot
 - [ ] Sidequest - train a bot with machine learning
   - [ ] gather training dataset of replays

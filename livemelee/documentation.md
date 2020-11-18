@@ -9,10 +9,10 @@ start_game((Bot(), Bot(), None, None))
 ## Importable from `livemelee`
 - `start_game` - function handles Dolphin startup to get in-game
 - `LiveInputsThread`, `LiveGameStats` - manage user commands during gameplay
-- `Stat` - submodule with conditions and pretty prints for `melee.GameState`
-- `Inputs` - submodule holding buttons + sequence constants, and helper funcs
 - `Bot`, `InputsBot`, `CheckBot`, `ControllableBot` - some bot classes to use or extend
 - `buttons` - extra debugging features for `melee.ControllerState`
+- `stat` - submodule with conditions and pretty prints for `melee.GameState`
+- `inputs` - submodule holding buttons + sequence constants, and helper funcs
 
 ## General flow
 - Create a bot and implement its main loop method:
@@ -60,4 +60,4 @@ start_game((None, MyBot(), None, None),
 ## More
 Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!
 
-Read up on the API used, [libmelee](https://github.com/altf4/libmelee): getting frame info from Gamestate, etc.
+Read up on the API used, [libmelee](https://github.com/altf4/libmelee): getting info from Gamestate, etc.

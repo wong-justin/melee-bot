@@ -1,8 +1,8 @@
 import melee
 import random
 import time
-from . import Inputs
-from . import Stat
+from . import inputs as Inputs
+from . import stat as Stat
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
@@ -333,35 +333,13 @@ class FalcoBot(CheckBot):
 
 # under construction:
 
-# def _with_ports(self, func):
-#     def stat_with_ports(gamestate):
-#         return func(gamestate, self.my_port, self.opp_port)
-#     return stat_with_ports
+def _with_ports(self, func):
+    def stat_with_ports(gamestate):
+        return func(gamestate, self.my_port, self.opp_port)
+    return stat_with_ports
 
-# class MultiCheckBot(InputsBot):
-#
-#     FINISH_NOW = 1
-#     STOP_CHECKING = 2
-#     KEEP_CHECKING = 3
-#
-#     def __init__(self, controller,
-#                  character=melee.Character.FALCO,
-#                  stage=melee.Stage.FINAL_DESTINATION):
-#         super().__init__(controller, character, stage)
-#
-#         self.checks = {}
-#
-#     def check_frame(self, gamestate):
-#         remove = []
-#         for condition, do in self.checks.items():
-#             if condition(self, gamestate):
-#                 retval = do()
-#                 if retval == MultiCheckBot.FINISH_NOW:
-#                     return
-#                 elif retval == MultiCheckBot.STOP_CHECKING:
-#                     remove.append(condition)
-#         for condition in remove:
-#             del self.checks[condition]
-#
-#     def something(self):
-#         pass
+def detect_ports(self, gamestate):
+    # melee.GameState.port_detector(gamestate, self.character, self.costume)
+    players = gamestate.player.items()
+
+    #
