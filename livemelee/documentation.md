@@ -10,7 +10,7 @@ start_game((Bot(), Bot(), None, None))
 - `start_game` - function handles Dolphin startup to get in-game
 - `LiveInputsThread`, `LiveGameStats` - manage user commands during gameplay
 - `Bot`, `InputsBot`, `CheckBot`, `ControllableBot` - some bot classes to use or extend
-- `inputs` - submodule holding buttons + sequence constants, and helper funcs
+- `inputs` - buttons + sequence constants, and helper funcs
 - `utils` - group of functions with conditions and pretty prints for `melee.GameState`; also a controller wrapper
 
 

@@ -1,16 +1,26 @@
-'''Wrapping melee.Button enums for easy sequences and consumption (see usage in bots).
+'''Wrapping `melee.Button` enums for easy sequences and consumption (see usage in bots).
+
+Only custom press will be sticks - `(True, melee.Button.WHICH_STICK, x, y)`.
+All other presses are constants in this module (eg. `A`, `up`, `release`).
+
+Included are some funcs returning premade sequences (eg. `dashdance()`)
+Make your own sequences by making a list of presses - see funcs for examples.
+
+### Rules/format for inputs:
 
 Representing a single input - `tuple`:
-    - `(True, btn, x, y)`   tilt_analog
-    - !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.--
-    - `(True, btn)`         press_btn
-    - `(False, btn)`        release_btn
-    - `(False,)`            release_all
-    - `()`                  no inputs this frame.
+
+- `(True, btn, x, y)`   tilt_analog
+- !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.
+- `(True, btn)`         press_btn
+- `(False, btn)`        release_btn
+- `(False,)`            release_all
+- `()`                  no inputs this frame.
 
 Inputs in a frame - `tuple(tuple)`:
-    - `(single_input,)`
-    - `(many,inputs,same,frame)`
+
+- `(single_input,)`
+- `(many,inputs,same,frame)`
 
 A sequence of inputs, frame by frame - `list[tuple(tuple))]`:
 ```

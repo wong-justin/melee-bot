@@ -4,7 +4,7 @@ Two kinds of gamestate functions:
     conditions returning bools, and
     pretty printers returning strings.
 
-Also included is a controller state wrapper: loggable_controller().
+Also included is a controller state wrapper: `loggable_controller()`.
 
 These would be nice additions to the libmelee package,
 but we make do with this patchy submodule.

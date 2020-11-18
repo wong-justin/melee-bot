@@ -34,8 +34,7 @@ start_game((Bot(), Bot(), None, None))
 <li><code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> - function handles Dolphin startup to get in-game</li>
 <li><code><a title="livemelee.LiveInputsThread" href="#livemelee.LiveInputsThread">LiveInputsThread</a></code>, <code><a title="livemelee.LiveGameStats" href="#livemelee.LiveGameStats">LiveGameStats</a></code> - manage user commands during gameplay</li>
 <li><code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code>, <code><a title="livemelee.InputsBot" href="#livemelee.InputsBot">InputsBot</a></code>, <code><a title="livemelee.CheckBot" href="#livemelee.CheckBot">CheckBot</a></code>, <code><a title="livemelee.ControllableBot" href="#livemelee.ControllableBot">ControllableBot</a></code> - some bot classes to use or extend</li>
-<li><code>buttons</code> - extra debugging features for <code>melee.ControllerState</code></li>
-<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> - submodule holding buttons + sequence constants, and helper funcs</li>
+<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> - buttons + sequence constants, and helper funcs</li>
 <li><code><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code> - group of functions with conditions and pretty prints for <code>melee.GameState</code>; also a controller wrapper</li>
 </ul>
 <h2 id="general-flow">General flow</h2>
@@ -127,7 +126,7 @@ __all__ = [
 </dd>
 <dt><code class="name"><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code></dt>
 <dd>
-<div class="desc"><p>Wrapping melee.Button enums for easy sequences and consumption (see usage in bots) …</p></div>
+<div class="desc"><p>Wrapping <code>melee.Button</code> enums for easy sequences and consumption (see usage in bots) …</p></div>
 </dd>
 <dt><code class="name"><a title="livemelee.interact" href="interact.html">livemelee.interact</a></code></dt>
 <dd>
@@ -157,15 +156,22 @@ Command-line first asks for dolphin folder path, then game starts with args:</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>ports</code></strong></dt>
-<dd>tuple containing 4 bot instances or Nones.
-eg. (None, Bot(), None, None)</dd>
+<dd>
+<p>tuple containing 4 bot instances or Nones.</p>
+<p>eg. <code>(None, <a title="livemelee.Bot" href="#livemelee.Bot">Bot</a>, None, None)</code></p>
+</dd>
 <dt><strong><code>live_interface</code></strong></dt>
-<dd>optional.
-- LiveInputsThread: externally initialized (prob with custom commands)
-- None: no live thread desired (probably for performance)
-- default: normal LiveGameStats</dd>
+<dd>
+<p>optional.</p>
+<ul>
+<li>LiveInputsThread: externally initialized with custom commands.
+Don't worry about onshutdown; it will be taken care of in this method.</li>
+<li>None: no live thread desired (probably for performance)</li>
+<li>default: normal LiveGameStat</li>
+</ul>
+</dd>
 <dt><strong><code>log</code></strong></dt>
-<dd>bool, write game logs to file with melee.Logger if True (default)</dd>
+<dd>bool, write game logs to file with <code>melee.Logger</code> if True (default)</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -177,12 +183,17 @@ eg. (None, Bot(), None, None)</dd>
 
     Args:
         ports: tuple containing 4 bot instances or Nones.
-            eg. (None, Bot(), None, None)
+
+            eg. `(None, Bot(), None, None)`
+
         live_interface: optional.
-            - LiveInputsThread: externally initialized (prob with custom commands)
+
+            - LiveInputsThread: externally initialized with custom commands.
+            Don&#39;t worry about onshutdown; it will be taken care of in this method.
             - None: no live thread desired (probably for performance)
-            - default: normal LiveGameStats
-        log: bool, write game logs to file with melee.Logger if True (default)&#39;&#39;&#39;
+            - default: normal LiveGameStat
+
+        log: bool, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
 
     args = _start_command_line()
     console = melee.Console(path=args.path)

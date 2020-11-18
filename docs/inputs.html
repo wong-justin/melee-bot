@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>livemelee.inputs API documentation</title>
-<meta name="description" content="Wrapping melee.Button enums for easy sequences and consumption (see usage in bots) …" />
+<meta name="description" content="Wrapping `melee.Button` enums for easy sequences and consumption (see usage in bots) …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,22 +22,31 @@
 <h1 class="title">Module <code>livemelee.inputs</code></h1>
 </header>
 <section id="section-intro">
-<p>Wrapping melee.Button enums for easy sequences and consumption (see usage in bots).</p>
-<p>Representing a single input - <code>tuple</code>:
-- <code>(True, btn, x, y)</code>
-tilt_analog
-- !! forgot L/R, whoops. <code>(True, btn, float)</code> will likely be the format.&ndash;
-- <code>(True, btn)</code>
-press_btn
-- <code>(False, btn)</code>
-release_btn
-- <code>(False,)</code>
-release_all
-- <code>()</code>
-no inputs this frame.</p>
-<p>Inputs in a frame - <code>tuple(tuple)</code>:
-- <code>(single_input,)</code>
-- <code>(many,inputs,same,frame)</code></p>
+<p>Wrapping <code>melee.Button</code> enums for easy sequences and consumption (see usage in bots).</p>
+<p>Only custom press will be sticks - (True, melee.Button.WHICH_STICK, x, y).
+All other presses are constants here (eg. A, up, release).</p>
+<p>Included are some funcs returning premade sequences (eg. dashdance())
+Make your own sequences by making a list of presses - see funcs for examples.</p>
+<h3 id="rulesformat-for-inputs">Rules/format for inputs:</h3>
+<p>Representing a single input - <code>tuple</code>:</p>
+<ul>
+<li><code>(True, btn, x, y)</code>
+tilt_analog</li>
+<li>!! forgot L/R, whoops. <code>(True, btn, float)</code> will likely be the format.</li>
+<li><code>(True, btn)</code>
+press_btn</li>
+<li><code>(False, btn)</code>
+release_btn</li>
+<li><code>(False,)</code>
+release_all</li>
+<li><code>()</code>
+no inputs this frame.</li>
+</ul>
+<p>Inputs in a frame - <code>tuple(tuple)</code>:</p>
+<ul>
+<li><code>(single_input,)</code></li>
+<li><code>(many,inputs,same,frame)</code></li>
+</ul>
 <p>A sequence of inputs, frame by frame - <code>list[tuple(tuple))]</code>:</p>
 <pre><code>four_frames_of_inputs = [
     ((True, Button.BUTTON_MAIN, 0.5, 0), (True, Button.BUTTON_B)),
@@ -51,19 +60,29 @@ no inputs this frame.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#39;&#39;&#39;Wrapping melee.Button enums for easy sequences and consumption (see usage in bots).
+<pre><code class="python">&#39;&#39;&#39;Wrapping `melee.Button` enums for easy sequences and consumption (see usage in bots).
+
+Only custom press will be sticks - (True, melee.Button.WHICH_STICK, x, y).
+All other presses are constants here (eg. A, up, release).
+
+Included are some funcs returning premade sequences (eg. dashdance())
+Make your own sequences by making a list of presses - see funcs for examples.
+
+### Rules/format for inputs:
 
 Representing a single input - `tuple`:
-    - `(True, btn, x, y)`   tilt_analog
-    - !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.--
-    - `(True, btn)`         press_btn
-    - `(False, btn)`        release_btn
-    - `(False,)`            release_all
-    - `()`                  no inputs this frame.
+
+- `(True, btn, x, y)`   tilt_analog
+- !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.
+- `(True, btn)`         press_btn
+- `(False, btn)`        release_btn
+- `(False,)`            release_all
+- `()`                  no inputs this frame.
 
 Inputs in a frame - `tuple(tuple)`:
-    - `(single_input,)`
-    - `(many,inputs,same,frame)`
+
+- `(single_input,)`
+- `(many,inputs,same,frame)`
 
 A sequence of inputs, frame by frame - `list[tuple(tuple))]`:
 ```
@@ -465,7 +484,9 @@ Use * to unpack in sequence.</p>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#rulesformat-for-inputs">Rules/format for inputs:</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>

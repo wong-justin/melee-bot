@@ -27,7 +27,7 @@ class LiveInputsThread(threading.Thread):
             'seq': (bot.loop_inputs, 'repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
         })
     ```
-    >>> [...this thread is waiting and game loop is started...]
+    [...this thread is waiting and game loop is started...]
     >>> connect PLUP#123
     >>> moveto 10 40
     >>> status

@@ -36,12 +36,17 @@ def start_game(ports, live_interface=LiveGameStats(), log=True):
 
     Args:
         ports: tuple containing 4 bot instances or Nones.
-            eg. (None, Bot(), None, None)
+
+            eg. `(None, Bot(), None, None)`
+
         live_interface: optional.
-            - LiveInputsThread: externally initialized (prob with custom commands)
+
+            - LiveInputsThread: externally initialized with custom commands.
+            Don&#39;t worry about onshutdown; it will be taken care of in this method.
             - None: no live thread desired (probably for performance)
-            - default: normal LiveGameStats
-        log: bool, write game logs to file with melee.Logger if True (default)&#39;&#39;&#39;
+            - default: normal LiveGameStat
+
+        log: bool, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
 
     args = _start_command_line()
     console = melee.Console(path=args.path)
@@ -119,15 +124,22 @@ Command-line first asks for dolphin folder path, then game starts with args:</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>ports</code></strong></dt>
-<dd>tuple containing 4 bot instances or Nones.
-eg. (None, Bot(), None, None)</dd>
+<dd>
+<p>tuple containing 4 bot instances or Nones.</p>
+<p>eg. <code>(None, Bot(), None, None)</code></p>
+</dd>
 <dt><strong><code>live_interface</code></strong></dt>
-<dd>optional.
-- LiveInputsThread: externally initialized (prob with custom commands)
-- None: no live thread desired (probably for performance)
-- default: normal LiveGameStats</dd>
+<dd>
+<p>optional.</p>
+<ul>
+<li>LiveInputsThread: externally initialized with custom commands.
+Don't worry about onshutdown; it will be taken care of in this method.</li>
+<li>None: no live thread desired (probably for performance)</li>
+<li>default: normal LiveGameStat</li>
+</ul>
+</dd>
 <dt><strong><code>log</code></strong></dt>
-<dd>bool, write game logs to file with melee.Logger if True (default)</dd>
+<dd>bool, write game logs to file with <code>melee.Logger</code> if True (default)</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -139,12 +151,17 @@ eg. (None, Bot(), None, None)</dd>
 
     Args:
         ports: tuple containing 4 bot instances or Nones.
-            eg. (None, Bot(), None, None)
+
+            eg. `(None, Bot(), None, None)`
+
         live_interface: optional.
-            - LiveInputsThread: externally initialized (prob with custom commands)
+
+            - LiveInputsThread: externally initialized with custom commands.
+            Don&#39;t worry about onshutdown; it will be taken care of in this method.
             - None: no live thread desired (probably for performance)
-            - default: normal LiveGameStats
-        log: bool, write game logs to file with melee.Logger if True (default)&#39;&#39;&#39;
+            - default: normal LiveGameStat
+
+        log: bool, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
 
     args = _start_command_line()
     console = melee.Console(path=args.path)
