@@ -37,13 +37,14 @@ ___
 #### Todo
 
 - [ ] Generalize for other ports and online connection
-  - [ ] investigate same-char-costume port detection
+  - [ ] investigate same-char-costume port detection solution
 - [ ] Unit tests
 - [ ] Test on Linux, OSX
-- [ ] refactor misc tidbits as utils submodule?
+- [x] refactor misc tidbits as utils submodule?
 - [ ] Round out inputs module
   - [ ] switch arg order in repeat()
   - [ ] capitalize button constants?
+- [ ] consistent args inheritance in Bots
 - [ ] use command line to set dolphin path as local config?
 - [ ] update demo gif with stat tracking
 - [ ] clean up docs formatting

@@ -4,14 +4,15 @@
 from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 ```
+
 `python main.py "path/to/dolphin/folder"`
 
-## Importable from `livemelee`
-- `start_game` - function handles Dolphin startup to get in-game
-- `LiveInputsThread`, `LiveGameStats` - manage user commands during gameplay
-- `Bot`, `InputsBot`, `CheckBot`, `ControllableBot` - some bot classes to use or extend
-- `inputs` - buttons + sequence constants, and helper funcs
-- `utils` - group of functions with conditions and pretty prints for `melee.GameState`; also a controller wrapper
+## Components of `livemelee`
+- `start_game` - function handling Dolphin startup to get in-game
+- `LiveInputsThread` - manages user commands during gameplay
+- Different `Bot` classes to use or extend
+- `inputs` - framework for pressing buttons
+- `utils` - functions for conditions and pretty prints using `melee.GameState`
 
 
 ## General flow
@@ -60,4 +61,4 @@ start_game((None, MyBot(), None, None),
 ## More
 Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!
 
-Read up on the API used, [libmelee](https://github.com/altf4/libmelee): getting info from Gamestate, etc.
+Read up on the API used, [libmelee](https://github.com/altf4/libmelee): info from GameState, PlayerState, etc.

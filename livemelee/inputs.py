@@ -1,17 +1,18 @@
 '''Wrapping `melee.Button` enums for easy sequences and consumption (see usage in bots).
 
-Only custom press will be sticks - `(True, melee.Button.WHICH_STICK, x, y)`.
+Main need for custom press will be sticks - `(True, melee.Button.WHICH_STICK, x, y)`.
 All other presses are constants in this module (eg. `A`, `up`, `release`).
 
 Included are some funcs returning premade sequences (eg. `dashdance()`)
 Make your own sequences by making a list of presses - see funcs for examples.
+Unpack sequences in other sequences with *.
 
-### Rules/format for inputs:
+### Format for inputs:
 
 Representing a single input - `tuple`:
 
 - `(True, btn, x, y)`   tilt_analog
-- !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.
+- !! forgot L/R analog vals, whoops. `(True, btn, float)` will likely be the format.
 - `(True, btn)`         press_btn
 - `(False, btn)`        release_btn
 - `(False,)`            release_all
@@ -37,7 +38,11 @@ from melee import Button
 import random
 
 def make_inputs(inputs, controller):
-    # press given buttons for this frame
+    '''Press given buttons for this frame. Used in bots.
+
+    Args:
+        inputs: tuple of button inputs for this frame
+        controller: `melee.Controller` to be pressed '''
     for press, *button_args in inputs:
         if len(button_args) > 1:    # (True, btn_stick, x, y)
             controller.tilt_analog(*button_args)
@@ -54,11 +59,11 @@ def make_inputs(inputs, controller):
 def wait(n):
     '''Gives n frames of no inputs. Use * to unpack in sequence.
     >>> inputs = [
-    >>>     ...,
     >>>     *wait(3),
+    >>>     ...
     >>> ]
 
-    >>> [..., (), (), (),]'''
+    >>> [(), (), (), ...]'''
     return [()] * n
     # return [()for _ in range(n)]
 

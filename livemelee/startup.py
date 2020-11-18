@@ -6,7 +6,7 @@ from .interact import LiveGameStats
 
 def start_game(ports, live_interface=LiveGameStats(), log=True):
     '''Main method to fully start game.
-    Command-line first asks for dolphin folder path, then game starts with args:
+    Command-line first needs dolphin folder path, then game starts with args:
 
     Args:
         ports: tuple containing 4 bot instances or Nones.
@@ -18,7 +18,7 @@ def start_game(ports, live_interface=LiveGameStats(), log=True):
             - `LiveInputsThread`: externally initialized with custom commands.
             Don't worry about onshutdown; it will be taken care of in this method.
             - `None`: no live thread desired (probably for performance)
-            - default: normal LiveGameStat
+            - default: new `LiveGameStats`
 
         log: bool, write game logs to file with `melee.Logger` if True (default)'''
 
