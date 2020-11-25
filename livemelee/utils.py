@@ -23,16 +23,12 @@ from melee import ControllerState, Button, Menu, Action
 def in_game(g):
     return g.menu_state in (Menu.IN_GAME, Menu.SUDDEN_DEATH)
 
-# def not_lasering(gamestate):
-#     # just for standing, no aerial actions
-#     return not gamestate.player[2].action in (Action.LASER_GUN_PULL,
-#                                               Action.NEUTRAL_B_CHARGING,
-#                                               Action.NEUTRAL_B_ATTACKING)
 def not_taunting(gamestate):
     return not gamestate.player[2].action in (Action.TAUNT_LEFT,
                                               Action.TAUNT_RIGHT)
 def grounded(gamestate):
     return gamestate.player[2].on_ground
+
 
 ### pretty printing
 
@@ -64,6 +60,8 @@ def stocks(g):
     return 'Stocks: {}  {}'.format(g.player[1].stock,
                                  g.player[2].stock)
 
+def controller1(g):
+    return 'Controller: ' + str(loggable_controller(g.player[1].controller_state))
 
 ### controller wrapper
 
@@ -83,14 +81,17 @@ class _ComparableState(ControllerState):
         # digitals
         active = {btn for btn, pressed in self.button.items() if pressed}
         # analogs
-        if not self.main_stick == (.5, .5): # perhaps rare float comparison error? not important now
-            active.add(Button.BUTTON_MAIN)
-        if not self.c_stick == (.5, .5):
-            active.add(Button.BUTTON_C)
-        if not self.l_shoulder == 0:
-            active.add(Button.BUTTON_L)
-        if not self.r_shoulder == 0:
-            active.add(Button.BUTTON_R)
+
+        active.add((Button.BUTTON_MAIN, *self.main_stick))
+        active.add((Button.BUTTON_L, self.l_shoulder))
+        # if not self.main_stick == (.5, .5): # perhaps rare float comparison error? not important now
+        #     active.add(Button.BUTTON_MAIN)
+        # if not self.c_stick == (.5, .5):
+        #     active.add(Button.BUTTON_C)
+        # if not self.l_shoulder == 0:
+        #     active.add(Button.BUTTON_L)
+        # if not self.r_shoulder == 0:
+        #     active.add(Button.BUTTON_R)
         return active
 
     def __str__(self):

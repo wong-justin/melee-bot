@@ -1,13 +1,136 @@
 '''Collection of bot classes to extend.'''
 
 import melee
+from melee import MenuHelper, Menu
 import random
 import time
 from . import inputs as Inputs
 from . import utils
+import inspect
 
 Buttons = melee.enums.Button
 Actions = melee.enums.Action
+
+DEFAULT_CHAR = melee.Character.FOX
+DEFAULT_STAGE = melee.Stage.FINAL_DESTINATION
+
+def _set_random_analogs(controller):
+    # preparing for port detection
+    x, y, L = ( round(random.random(), 2) for _ in range(3) )
+    # stick = (True, Buttons.BUTTON_MAIN, x, y)
+    # trigger = (True, Buttons.BUTTON_L, L)
+    # frame1_seq = [(stick, trigger,)]
+    print(x, y, L)
+    controller.tilt_analog(Buttons.BUTTON_MAIN, x, y)
+    controller.press_shoulder(Buttons.BUTTON_L, L)
+    return x, y, L
+
+def _get_analogs(controller_state):
+    # during port detection
+    x, y = controller_state.main_stick
+    L = controller_state.l_shoulder
+    return x, y, L
+
+class PortBot:
+    def __init__(self):
+        self.controller = None
+        self.character = DEFAULT_CHAR
+        self.stage = DEFAULT_STAGE
+        self._finished_stage = False
+        self._last_gamestate = None
+
+    def act(self, gamestate):
+        self._last_gamestate = gamestate
+
+        if utils.in_game(gamestate):
+            # if gamestate.frame == -1:   #-123:  # first frame (i think)
+            #     self._detect_ports(gamestate)
+            if gamestate.frame == -1:   #-123:  # first frame (i think)
+                self._vals = _set_random_analogs(self.controller)
+            elif gamestate.frame == 0:
+                self._detect_ports(gamestate)
+            else:
+                self.play_frame(gamestate)
+        else:
+            self._menu_nav(gamestate)
+
+    def _menu_nav(self, gamestate):
+        # normal menu helper except set rand inputs for frame 1 port detection after last step (selecting stage)
+        # copypasted from melee.menu_helper_simple
+
+        # If we're at the character select screen, choose our character
+        if gamestate.menu_state in (Menu.CHARACTER_SELECT, Menu.SLIPPI_ONLINE_CSS):
+            if gamestate.submenu == melee.SubMenu.NAME_ENTRY_SUBMENU:
+                MenuHelper.name_tag_index = MenuHelper.enter_direct_code(gamestate=gamestate,
+                                                                         controller=self.controller,
+                                                                         # connect_code=connect_code,
+                                                                         index=melee.MenuHelper.name_tag_index)
+            else:
+                MenuHelper.choose_character(character=self.character,
+                                            gamestate=gamestate,
+                                            controller=self.controller,
+                                            # cpu_level=cpu_level,
+                                            # costume=costume,
+                                            # swag=swag,
+                                            start=True)#autostart)
+        # If we're at the postgame scores screen, spam START
+        elif gamestate.menu_state == Menu.POSTGAME_SCORES:
+            MenuHelper.skip_postgame(controller=self.controller)
+        # If we're at the stage select screen, choose a stage
+        elif gamestate.menu_state == Menu.STAGE_SELECT and not self._finished_stage:
+
+            ## new insert, not in libmelee
+            # listen for A press on controller, signaling about to start game
+            if self.controller.current.button[Buttons.BUTTON_A]:
+                # self._vals = _set_random_analogs(self.controller)
+                self._finished_stage = True
+            else:
+
+                # normal from libmelee
+                MenuHelper.choose_stage(stage=self.stage,
+                                        gamestate=gamestate,
+                                        controller=self.controller)
+        elif gamestate.menu_state == Menu.MAIN_MENU:
+            # if connect_code:
+            #     MenuHelper.choose_direct_online(gamestate=gamestate, controller=self.controller)
+            # else:
+            #     MenuHelper.choose_versus_mode(gamestate=gamestate, controller=self.controller)
+            MenuHelper.choose_versus_mode(gamestate=gamestate, controller=self.controller)
+
+    def _detect_ports(self, gamestate):
+        # returns port num for this bot and opponent, eg. (1,2).
+        # needs to be in game
+        # - set stick, L/R to random values
+        # - first frame of game, check gamestate controller states to find matching vals
+        # unlikely that the other player has the same analog vals.
+        # set controller after choosing stage? that way frame 1 of game is checking and releasing,
+        # as opposed to frame 1 setting and frame 2 checking + releasing, leaving f3 actionable.
+        # will this buffer any inputs?
+        # what's the float precision in controller state?
+        mine = -1
+        other = -1
+        print('detecting..')
+        # self._vals = _set_random_analogs(controller)
+        for port, pstate in gamestate.player.items():
+            these_vals = _get_analogs(pstate.controller_state)
+            print(these_vals) #
+            if self._vals == these_vals:
+                mine = port
+            else:
+                other = port
+
+        self.ports = (mine, other)
+        return mine, other
+
+    def get_controller_state(self):
+        return 'From controller: {}\nFrom gamestate: {}'.format(
+            utils.loggable_controller(self.controller.current),
+            utils.controller1(self._last_gamestate) )
+
+    def play_frame(self, gamestate):
+        pass
+
+
 
 class Bot:
     '''Framework for making controller inputs.
@@ -19,8 +142,8 @@ class Bot:
         stage: melee.Stage'''
 
     def __init__(self, controller=None,
-                 character=melee.Character.FOX,
-                 stage=melee.Stage.FINAL_DESTINATION):
+                 character=DEFAULT_CHAR,
+                 stage=DEFAULT_STAGE):
         self.controller = controller
         self.character = character
         self.stage = stage
@@ -66,7 +189,9 @@ class InputsBot(Bot):
     Attributes:
         queue: list of inputs as outlined in inputs.py'''
 
-    def __init__(self, controller, character, stage):
+    def __init__(self, controller=None,
+                 character=DEFAULT_CHAR,
+                 stage=DEFAULT_STAGE):
         super().__init__(controller, character, stage)
         self.queue = []
 
@@ -105,12 +230,10 @@ class CheckBot(InputsBot):
     Eg.
     `self.repeat(when=self.finished_inputs, do=some_func)`'''
 
-    def __init__(self, controller=None,
-                 character=melee.Character.FOX,
-                 stage=melee.Stage.FINAL_DESTINATION):
-        super().__init__(controller=controller,
-                         character=character,
-                         stage=stage)
+    def __init__(self, self, controller=None,
+                 character=DEFAULT_CHAR,
+                 stage=DEFAULT_STAGE):
+        super().__init__(controller, character, stage)
 
         self.when = never
         self.do = lambda:None
@@ -173,7 +296,7 @@ class ControllableBot(InputsBot):
 
     def __init__(self, controller=None,
                  character=melee.Character.FALCO,
-                 stage=melee.Stage.FINAL_DESTINATION):
+                 stage=DEFAULT_STAGE):
         super().__init__(controller, character, stage)
 
         self.commands = self._init_commands()
@@ -232,10 +355,8 @@ def _make_seq(button):
 class FalcoBot(CheckBot):
     # working with previous features
 
-    def __init__(self, controller=None):
-        super().__init__(controller=controller,
-                         character=melee.Character.FALCO,
-                         stage=melee.Stage.FINAL_DESTINATION)
+    def __init__(self):
+        super().__init__(character=melee.Character.FALCO)
 
         # self.investigate_jumpframes()
         self.jumped = False

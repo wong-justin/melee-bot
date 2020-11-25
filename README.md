@@ -41,10 +41,12 @@ ___
 - [ ] Unit tests
 - [ ] Test on Linux, OSX
 - [x] refactor misc tidbits as utils submodule?
+  - [ ] rename bool utils with prefix `is_...()`
 - [ ] Round out inputs module
   - [ ] switch arg order in repeat()
   - [ ] capitalize button constants?
 - [ ] consistent args inheritance in Bots
+  - [ ] is there a clean solution for inherting `__init__` signature? would like to cascade to base class with defaults
 - [ ] use command line to set dolphin path as local config?
 - [ ] update demo gif with stat tracking
 - [ ] clean up docs formatting
