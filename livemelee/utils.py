@@ -60,8 +60,8 @@ def stocks(g):
     return 'Stocks: {}  {}'.format(g.player[1].stock,
                                  g.player[2].stock)
 
-def controller1(g):
-    return 'Controller: ' + str(loggable_controller(g.player[1].controller_state))
+def get_controller(g, port):
+    return 'Controller: ' + str(loggable_controller(g.player[port].controller_state))
 
 ### controller wrapper
 

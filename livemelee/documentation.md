@@ -40,6 +40,8 @@ class MyBot(InputsBot):
 - Init an interactive thread with custom commands:
 
 ```python
+bot = MyBot()
+
 live_interface = LiveGameStats(commands={
     'i': (bot.set_some_inputs,
           'make inputs now'),
@@ -52,7 +54,7 @@ live_interface = LiveGameStats(commands={
 - Put bots in ports and give interactive thread:
 
 ```python
-start_game((None, MyBot(), None, None),
+start_game((None, bot, None, None),
            live_interface=live_interface)
 ```
 - Run on command line, passing dolphin path: `python main.py "path/to/dolphin/folder"`

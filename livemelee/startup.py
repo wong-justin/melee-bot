@@ -32,8 +32,7 @@ def start_game(ports, live_interface=LiveGameStats(), log=True):
     logger = melee.Logger() if log else None
 
     if live_interface:
-        # they gave their own but couldn't given console shutdown,
-        # or we made default right away but didn't provide shutdown either.
+        # whether given or default, no shutdown provided yet (needs console)
         live_interface.onshutdown = _shutdown(console, logger)
         live_interface.start()
 
@@ -65,7 +64,6 @@ def _assign_controllers(ports, console):
     for port, bot in enumerate(ports):
         if bot:
             controller = melee.Controller(console=console, port=port+1)
-            controller.connect()
             bot.controller = controller
             bots.append(bot)
     return bots

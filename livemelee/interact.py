@@ -164,27 +164,28 @@ class LiveGameStats(LiveInputsThread):
     >>> a
     >>> Action states: Action.CROUCHING  Action.LANDING'''
 
-    def __init__(self, onshutdown=lambda:None, commands={}):
+    def __init__(self, commands={}, cmds_with_gamestate={}):
 
-        stats = {cmd: ( self._with_gamestate(func), descrip )
-             for cmd, (func, descrip) in {
-                'f': (utils.frame_num, 'frame num'),
-                'p': (utils.percents, 'percents'),
-                'd': (utils.distance, 'distance'),
-                'a': (utils.actions, 'action states'),
-                'g': (utils.gamestate, 'gamestate'),
-                'm': (utils.menu, 'menu'),
-                'stocks': (utils.stocks, 'stocks'),
-             }.items()
-        }
-        stats.update({   # don't need gamestate
+        cmds_with_gamestate.update({
+            'f': (utils.frame_num, 'frame num'),
+            'p': (utils.percents, 'percents'),
+            'd': (utils.distance, 'distance'),
+            'a': (utils.actions, 'action states'),
+            'g': (utils.gamestate, 'gamestate'),
+            'm': (utils.menu, 'menu'),
+            'stocks': (utils.stocks, 'stocks'),
+        })
+        for cmd, details in cmds_with_gamestate.items():
+            func, descrip = _unpack(details)
+            commands[cmd] = ( self._with_gamestate(func), descrip )
+
+        commands.update({   # don't need gamestate
             'dur': (self._stock_duration, 'this stock duration'),
             'track': (self._track, 'print [cmd] when it updates'),
             'no': (self._reset_tracker, 'stop tracking'),
         })
-        commands.update(stats)
         self.commands = commands
-        super().__init__(onshutdown=onshutdown, commands=commands)
+        super().__init__(commands=commands)
 
         # any persistent/cumulative stats
         self._stock_duration = 0     # frames
@@ -196,7 +197,7 @@ class LiveGameStats(LiveInputsThread):
 
     def _with_gamestate(self, func):
         # wrapper to pass last gamestate stored in self
-        return lambda: func(self._last_gamestate)
+        return lambda *args: func(self._last_gamestate, *args)
 
     def update(self, gamestate):
         '''Call this each frame with new gamestate to update recent stats.'''

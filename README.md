@@ -38,6 +38,7 @@ ___
 
 - [ ] Generalize for other ports and online connection
   - [ ] investigate same-char-costume port detection solution
+    - [ ] generate list of processed joystick inputs ( `for .2f x,y in range(1) set_stick(x,y) -> processed_inputs_set.add(gamestate.controller(x,y))` ). Game has particular zones like that hax document showed, eg `(0.5, .6875)`, `(0.125, 0.5)`, etc
 - [ ] Unit tests
 - [ ] Test on Linux, OSX
 - [x] refactor misc tidbits as utils submodule?
@@ -46,7 +47,7 @@ ___
   - [ ] switch arg order in repeat()
   - [ ] capitalize button constants?
 - [ ] consistent args inheritance in Bots
-  - [ ] is there a clean solution for inherting `__init__` signature? would like to cascade to base class with defaults
+  - [ ] is there a clean solution for inherting `__init__` signature? would like to cascade to defaults from base class
 - [ ] use command line to set dolphin path as local config?
 - [ ] update demo gif with stat tracking
 - [ ] clean up docs formatting

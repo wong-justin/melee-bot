@@ -7,7 +7,7 @@ from . import utils
 from . import inputs
 
 from .startup import start_game
-from .interact import LiveInputsThread, LiveGameStats
+from .interact import LiveGameStats
 from .bots import Bot, InputsBot, CheckBot, ControllableBot
 
 # __pdoc__ = {obj: True for obj in (
@@ -21,7 +21,7 @@ from .bots import Bot, InputsBot, CheckBot, ControllableBot
 
 __all__ = [
     'start_game',
-    'LiveInputsThread', 'LiveGameStats',
+    'LiveGameStats',
     'Bot', 'InputsBot', 'CheckBot', 'ControllableBot',
     'inputs',
     'utils',

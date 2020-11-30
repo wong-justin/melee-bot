@@ -125,7 +125,7 @@ class PortBot:
     def get_controller_state(self):
         return 'From controller: {}\nFrom gamestate: {}'.format(
             utils.loggable_controller(self.controller.current),
-            utils.controller1(self._last_gamestate) )
+            utils.get_controller(self._last_gamestate, 1) )
 
     def play_frame(self, gamestate):
         pass
@@ -230,7 +230,7 @@ class CheckBot(InputsBot):
     Eg.
     `self.repeat(when=self.finished_inputs, do=some_func)`'''
 
-    def __init__(self, self, controller=None,
+    def __init__(self, controller=None,
                  character=DEFAULT_CHAR,
                  stage=DEFAULT_STAGE):
         super().__init__(controller, character, stage)
