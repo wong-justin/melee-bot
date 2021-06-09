@@ -5,3 +5,4 @@ __pycache__/
 demo/demo.mp4
 demo/notes.txt
 misc/*
+*.egg-info

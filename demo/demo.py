@@ -7,9 +7,17 @@ from livemelee.inputs import *  # alternative to `from livemelee import Inputs`
 # start_game((Bot(), Bot(), None, None))    # two dummy bots will sit in game
 
 # longer demo:
-teabag = [(down,), *wait(5), (center,), *wait(5)]   # down, center are buttons
+
+# create a sequence of controller inputs
+teabag = [
+    (down,),    # single button input
+    *wait(5),   # unpack list of 5 empty inputs
+    (center,),
+    *wait(5)
+]
+# compose into a longer sequence
 toxic_sequence = [          # create another sequence of controller inputs
-    *repeat(2, *teabag),    # unpack sequences in other sequences
+    *repeat(2, *teabag),
     *taunt(),
     *wait(120)
 ]
@@ -20,21 +28,24 @@ class ReformBot(CheckBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.commands = {          # user calls these midgame in shell by keypress
-            'c': (lambda: utils.loggable_controller(self.controller.current), # logging func
-                  'inspect controller'),                    # descrip
-            'reform': self.stop,   # another cmd: func - no descrip is ok
-        }
+        self.start()
+
+    def stop(self):                 # replace toxic action with inaction
+        self.do = lambda:None
+
+    def start(self):
         self.set_timer(n=150,
                        do=lambda: self.perform(toxic_sequence),
                        repeat=True)
-    def stop(self):                 # replace toxic action with inaction
-        self.do = lambda:None
 
 dummy = Bot()
 bot = ReformBot()
 
-live_interface = LiveGameStats(commands=bot.commands)   # init live thread
-                                                        #  adding our new cmds
-start_game((dummy, bot, None, None),        # use ports 1 and 2
-           live_interface=live_interface)   # dont forget to pass that obj
+commands = {
+    # command: function, description
+    'reform': (bot.stop, 'do nothing'),
+    'betoxic': (bot.start, 'taunt and teabag'),
+}
+
+start_game((dummy, bot, None, None),    # use ports 1 and 2
+           commands)
