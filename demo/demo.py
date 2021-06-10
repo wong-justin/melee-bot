@@ -47,5 +47,5 @@ commands = {
     'betoxic': (bot.start, 'taunt and teabag'),
 }
 
-start_game((dummy, bot, None, None),    # use ports 1 and 2
-           commands)
+# run dolphin with bots in ports 2 and 3
+start_game((None, dummy, bot, None), commands)

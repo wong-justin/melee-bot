@@ -43,7 +43,7 @@ class LiveInputsThread(threading.Thread):
                                          description='Perform commands during gameplay.',
                                          add_help=False)    # we have custom help arg, not "-help"
         meta_commands = {
-            'test': (lambda *s:'You typed {} arg(s): {}'.format(len(s), s), 'test [extra] [args] ...'),
+            # 'test': (lambda *s:'You typed {} arg(s): {}'.format(len(s), s), 'test [extra] [args] ...'),
             'help': parser.print_help,  # ideally help and quit dont get wrapped in _print and _accept_args
             'quit': lambda: BREAK_FLAG  #   when it happens in _add_commands
         }                               #   but oh well

@@ -2,7 +2,7 @@
 
 import argparse
 import melee
-from .interact import LiveGameStats
+from .interact import LiveInputsThread
 
 def start_game(ports, cmds={}, log=True):
     '''Main method to fully start game.
@@ -21,7 +21,7 @@ def start_game(ports, cmds={}, log=True):
 
         cmds: optional.
 
-            - `dict`: of custom commands {'keypress': (func, 'descrip')}.
+            - `dict`: of custom commands `'cmd': (func, 'descrip')` or `'cmd': func`.
             - default: empty dict, no custom commands
             - `None`: no live thread desired (probably for performance)
 
@@ -43,7 +43,7 @@ def start_game(ports, cmds={}, log=True):
 
     live_interface = None
     if cmds is not None:
-        live_interface = LiveGameStats(commands=cmds)
+        live_interface = LiveInputsThread(commands=cmds)    # LiveGameStats
         live_interface.onshutdown = _shutdown(console, logger)
         live_interface.start()
 

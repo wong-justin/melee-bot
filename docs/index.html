@@ -23,25 +23,27 @@
 </header>
 <section id="section-intro">
 <p>An easier way to develop a SSBM bot. Built off libmelee.</p>
+<p>This package aims to make a simpler API around <code>libmelee</code> and make it easier to start implementing your gameplay ideas.</p>
 <h2 id="quick-example">Quick Example</h2>
 <pre><code class="language-python"># main.py
 from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 </code></pre>
 <p><code>python main.py "path/to/dolphin/folder"</code></p>
-<h2 id="importable-from-livemelee">Importable from <code><a title="livemelee" href="#livemelee">livemelee</a></code></h2>
+<h2 id="components-of-livemelee">Components of <code><a title="livemelee" href="#livemelee">livemelee</a></code></h2>
 <ul>
-<li><code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> - function handles Dolphin startup to get in-game</li>
-<li><code><a title="livemelee.LiveInputsThread" href="#livemelee.LiveInputsThread">LiveInputsThread</a></code>, <code><a title="livemelee.LiveGameStats" href="#livemelee.LiveGameStats">LiveGameStats</a></code> - manage user commands during gameplay</li>
-<li><code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code>, <code><a title="livemelee.InputsBot" href="#livemelee.InputsBot">InputsBot</a></code>, <code><a title="livemelee.CheckBot" href="#livemelee.CheckBot">CheckBot</a></code>, <code><a title="livemelee.ControllableBot" href="#livemelee.ControllableBot">ControllableBot</a></code> - some bot classes to use or extend</li>
-<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> - buttons + sequence constants, and helper funcs</li>
-<li><code><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code> - group of functions with conditions and pretty prints for <code>melee.GameState</code>; also a controller wrapper</li>
+<li><code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> - function handling Dolphin startup to get in-game</li>
+<li>Different <code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code> classes to use or extend</li>
+<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> module - framework for pressing buttons</li>
+<li><code><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code> module - misc, eg. pretty prints</li>
 </ul>
-<h2 id="general-flow">General flow</h2>
+<h2 id="an-example-step-by-step">An example, step-by-step</h2>
+<p>A typical development case might look like:</p>
 <ul>
 <li>Create a bot and implement its main loop method:</li>
 </ul>
-<pre><code class="language-python">class MyBot(InputsBot):
+<pre><code class="language-python"># from livemelee import InputsBot
+class MyBot(InputsBot):
 
     def check_frame(self, gamestate):
         if gamestate.frame % 120 == 0:
@@ -50,7 +52,8 @@ start_game((Bot(), Bot(), None, None))
 <ul>
 <li>&hellip; by telling it when to make what inputs:</li>
 </ul>
-<pre><code class="language-python">    def make_some_inputs(self):
+<pre><code class="language-python"># from livemelee.inputs import *
+    def make_some_inputs(self):
         self.queue = [
             (down,),
             (B,),
@@ -60,29 +63,52 @@ start_game((Bot(), Bot(), None, None))
         ]
 </code></pre>
 <ul>
-<li>Init an interactive thread with custom commands:</li>
+<li>Define some commands for the interactive thread:</li>
 </ul>
-<pre><code class="language-python">live_interface = LiveGameStats(commands={
-    'i': (bot.set_some_inputs,
-          'make inputs now'),
-    'msg': (lambda: 'a message',
-          'print a message'),
-    'next': (lambda: bot.queue[0],
-             'next input queued'),
-})
+<pre><code class="language-python">bot = MyBot()
+
+commands = {
+    'i': (bot.set_some_inputs, 'make inputs now'),
+    'next': (lambda: bot.queue[0], 'print next input queued'),
+}
 </code></pre>
 <ul>
-<li>Put bots in ports and give interactive thread:</li>
+<li>Put bots in ports and start:</li>
 </ul>
-<pre><code class="language-python">start_game((None, MyBot(), None, None),
-           live_interface=live_interface)
+<pre><code class="language-python"># from livemelee import start_game
+start_game((None, bot, None, None), commands)
 </code></pre>
 <ul>
 <li>Run on command line, passing dolphin path: <code>python main.py "path/to/dolphin/folder"</code></li>
 </ul>
+<h2 id="a-deeper-look">A deeper look</h2>
+<p>Behind the scenes, <code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> implements Dolphin startup with libmelee.
+Additionally, you pass objects (bots) in the "ports" so they can get a controller and access the game state. It looks something like this:</p>
+<pre><code class="language-python"># essentially in start_game(bot, None, None, None):
+
+bot.controller = Controller()
+...
+while True:
+  gamestate = dolphin.next_frame()
+  bot.act(gamestate)
+</code></pre>
+<p>You could pass in something besides a bot if you just want access to the gamestate.
+Eg: humans play in ports 1,2 so a realtime parser in port 3 or 4 can make callbacks according to in-game triggers.</p>
+<p>The base class <code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code> implements <code>act</code> with menu navigation (from libmelee) so only <code>play_frame</code> is to be implemented for actual gameplay. Other <code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code> subclasses scaffold off that, such as how <code><a title="livemelee.InputsBot" href="#livemelee.InputsBot">InputsBot</a></code> gives you <code>check_frame</code> so you can <code>perform</code> inputs.</p>
+<hr>
+<p>The other feature of <code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> is realtime commands. After <code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> is called and opens Dolphin, a thread is opened in your terminal for typing commands. There's two default commands: <code>help</code>, which shows available commands, and <code>quit</code>, which closes the thread and Dolphin. You can make new commands with the format <code>command: function</code> or <code>command: (function, description)</code>. The result of <code>function()</code> is printed when <code>command</code> is entered.</p>
+<p>Notes on commands:
+- After a command, a period <code>.</code> is printed on a newline as a visual confirmation.
+- You could make a command function that takes multiple args. eg.<br>
+<code>&gt;&gt;&gt; cmd a b 10</code> would call <code>func_for_cmd('a','b','10')</code><br>
+But there's limitations because of <code>argparse</code>:
+- args can't start with "-" (RIP negatives) (it triggers parser unrecognized flag)
+- args will always be strings
+- <code>quit</code> causes some not-so-pretty error output, but Dolphin still closes fine.
+- <code>Ctrl-C</code> keyboard interrupt won't close cleanly (Dolphin will stay open). You should only use the <code>quit</code> command.</p>
 <h2 id="more">More</h2>
 <p>Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!</p>
-<p>Read up on the API used, <a href="https://github.com/altf4/libmelee">libmelee</a>: getting info from Gamestate, etc.</p>
+<p>Read up on the API that <code><a title="livemelee" href="#livemelee">livemelee</a></code> wraps around, <a href="https://github.com/altf4/libmelee">libmelee</a>; get to know GameState, PlayerState, Controller, etc.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -96,7 +122,7 @@ from . import utils
 from . import inputs
 
 from .startup import start_game
-from .interact import LiveInputsThread, LiveGameStats
+from .interact import LiveGameStats
 from .bots import Bot, InputsBot, CheckBot, ControllableBot
 
 # __pdoc__ = {obj: True for obj in (
@@ -110,11 +136,16 @@ from .bots import Bot, InputsBot, CheckBot, ControllableBot
 
 __all__ = [
     &#39;start_game&#39;,
-    &#39;LiveInputsThread&#39;, &#39;LiveGameStats&#39;,
+    # &#39;LiveGameStats&#39;,
     &#39;Bot&#39;, &#39;InputsBot&#39;, &#39;CheckBot&#39;, &#39;ControllableBot&#39;,
     &#39;inputs&#39;,
     &#39;utils&#39;,
-]</code></pre>
+]
+
+__pdoc__ = {
+    &#39;interact&#39;: False,
+    &#39;startup&#39;: False,
+}</code></pre>
 </details>
 </section>
 <section>
@@ -128,14 +159,6 @@ __all__ = [
 <dd>
 <div class="desc"><p>Wrapping <code>melee.Button</code> enums for easy sequences and consumption (see usage in bots) …</p></div>
 </dd>
-<dt><code class="name"><a title="livemelee.interact" href="interact.html">livemelee.interact</a></code></dt>
-<dd>
-<div class="desc"><p>Manage user commands during gameplay.</p></div>
-</dd>
-<dt><code class="name"><a title="livemelee.startup" href="startup.html">livemelee.startup</a></code></dt>
-<dd>
-<div class="desc"><p>Create entry point to init everything and start Dolphin.</p></div>
-</dd>
 <dt><code class="name"><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code></dt>
 <dd>
 <div class="desc"><p>Group of functions returning helpful stats, mainly info from gamestates …</p></div>
@@ -148,11 +171,16 @@ __all__ = [
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="livemelee.start_game"><code class="name flex">
-<span>def <span class="ident">start_game</span></span>(<span>ports, live_interface=&lt;LiveGameStats(input-thread, initial)&gt;, log=True)</span>
+<span>def <span class="ident">start_game</span></span>(<span>ports, cmds={}, log=True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Main method to fully start game.
-Command-line first asks for dolphin folder path, then game starts with args:</p>
+Command-line first needs dolphin folder path, then game starts.</p>
+<pre><code># main.py
+...
+start_game(...)
+</code></pre>
+<p><code>python main.py path/to/dolphin</code></p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>ports</code></strong></dt>
@@ -160,57 +188,67 @@ Command-line first asks for dolphin folder path, then game starts with args:</p>
 <p>tuple containing 4 bot instances or Nones.</p>
 <p>eg. <code>(None, my_bot, None, None)</code></p>
 </dd>
-<dt><strong><code>live_interface</code></strong></dt>
+<dt><strong><code>cmds</code></strong></dt>
 <dd>
 <p>optional.</p>
 <ul>
-<li><code><a title="livemelee.LiveInputsThread" href="#livemelee.LiveInputsThread">LiveInputsThread</a></code>: externally initialized with custom commands.
-Don't worry about onshutdown; it will be taken care of in this method.</li>
+<li><code>dict</code>: of custom commands <code>'cmd': (func, 'descrip')</code> or <code>'cmd': func</code>.</li>
+<li>default: empty dict, no custom commands</li>
 <li><code>None</code>: no live thread desired (probably for performance)</li>
-<li>default: normal LiveGameStat</li>
 </ul>
 </dd>
 <dt><strong><code>log</code></strong></dt>
-<dd>bool, write game logs to file with <code>melee.Logger</code> if True (default)</dd>
+<dd><code>bool</code>, write game logs to file with <code>melee.Logger</code> if True (default)</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def start_game(ports, live_interface=LiveGameStats(), log=True):
+<pre><code class="python">def start_game(ports, cmds={}, log=True):
     &#39;&#39;&#39;Main method to fully start game.
-    Command-line first asks for dolphin folder path, then game starts with args:
+    Command-line first needs dolphin folder path, then game starts.
+    ```
+    # main.py
+    ...
+    start_game(...)
+    ```
+    `python main.py path/to/dolphin`
 
     Args:
         ports: tuple containing 4 bot instances or Nones.
 
             eg. `(None, my_bot, None, None)`
 
-        live_interface: optional.
+        cmds: optional.
 
-            - `LiveInputsThread`: externally initialized with custom commands.
-            Don&#39;t worry about onshutdown; it will be taken care of in this method.
+            - `dict`: of custom commands `&#39;cmd&#39;: (func, &#39;descrip&#39;)` or `&#39;cmd&#39;: func`.
+            - default: empty dict, no custom commands
             - `None`: no live thread desired (probably for performance)
-            - default: normal LiveGameStat
 
-        log: bool, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
+        log: `bool`, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
 
     args = _start_command_line()
     console = melee.Console(path=args.path)
+
+    # controllers must be connected before console run/connect...
+    bots = _assign_controllers(ports, console)
+
     console.run()
     console.connect()
 
-    bots = _assign_controllers(ports, console)
+    # ... and connected after
+    _connect_controllers(bots)
 
     logger = melee.Logger() if log else None
 
-    if live_interface:
-        # they gave their own but couldn&#39;t given console shutdown,
-        # or we made default right away but didn&#39;t provide shutdown either.
+    live_interface = None
+    if cmds is not None:
+        live_interface = LiveInputsThread(commands=cmds)    # LiveGameStats
         live_interface.onshutdown = _shutdown(console, logger)
         live_interface.start()
 
     while True:
+
         gamestate = console.step()
         if not gamestate:
             break
@@ -237,7 +275,7 @@ Don't worry about onshutdown; it will be taken care of in this method.</li>
 <span>(</span><span>controller=None, character=Character.FOX, stage=Stage.FINAL_DESTINATION)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Framework for making controller inputs.
+<div class="desc"><p>Framework for making controller inputs according to gamestate.
 Offline only implementation currently.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
@@ -253,7 +291,7 @@ Offline only implementation currently.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Bot:
-    &#39;&#39;&#39;Framework for making controller inputs.
+    &#39;&#39;&#39;Framework for making controller inputs according to gamestate.
     Offline only implementation currently.
 
     Attributes:
@@ -262,8 +300,8 @@ Offline only implementation currently.</p>
         stage: melee.Stage&#39;&#39;&#39;
 
     def __init__(self, controller=None,
-                 character=melee.Character.FOX,
-                 stage=melee.Stage.FINAL_DESTINATION):
+                 character=DEFAULT_CHAR,
+                 stage=DEFAULT_STAGE):
         self.controller = controller
         self.character = character
         self.stage = stage
@@ -365,7 +403,7 @@ Offline only implementation currently.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>when</code></strong></dt>
-<dd>(ie trigger) condition called every frame (func taking gamestate)</dd>
+<dd>(ie trigger) a condition checked every frame (func taking gamestate)</dd>
 <dt><strong><code>do</code></strong></dt>
 <dd>(ie on_trigger) func called when condition returns True</dd>
 </dl>
@@ -381,7 +419,7 @@ Offline only implementation currently.</p>
     &#39;&#39;&#39;Adds condition checker to main loop.
 
     Attributes:
-        when: (ie trigger) condition called every frame (func taking gamestate)
+        when: (ie trigger) a condition checked every frame (func taking gamestate)
 
         do: (ie on_trigger) func called when condition returns True
 
@@ -392,11 +430,9 @@ Offline only implementation currently.</p>
     `self.repeat(when=self.finished_inputs, do=some_func)`&#39;&#39;&#39;
 
     def __init__(self, controller=None,
-                 character=melee.Character.FOX,
-                 stage=melee.Stage.FINAL_DESTINATION):
-        super().__init__(controller=controller,
-                         character=character,
-                         stage=stage)
+                 character=DEFAULT_CHAR,
+                 stage=DEFAULT_STAGE):
+        super().__init__(controller, character, stage)
 
         self.when = never
         self.do = lambda:None
@@ -584,7 +620,7 @@ See LiveInputsThread for details.</dd>
 
     def __init__(self, controller=None,
                  character=melee.Character.FALCO,
-                 stage=melee.Stage.FINAL_DESTINATION):
+                 stage=DEFAULT_STAGE):
         super().__init__(controller, character, stage)
 
         self.commands = self._init_commands()
@@ -685,7 +721,7 @@ See LiveInputsThread for details.</dd>
 </dd>
 <dt id="livemelee.InputsBot"><code class="flex name class">
 <span>class <span class="ident">InputsBot</span></span>
-<span>(</span><span>controller, character, stage)</span>
+<span>(</span><span>controller=None, character=Character.FOX, stage=Stage.FINAL_DESTINATION)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adds inputs queue to Bot.</p>
@@ -711,7 +747,9 @@ First queued input will happen same frame of queueing.</p>
     Attributes:
         queue: list of inputs as outlined in inputs.py&#39;&#39;&#39;
 
-    def __init__(self, controller, character, stage):
+    def __init__(self, controller=None,
+                 character=DEFAULT_CHAR,
+                 stage=DEFAULT_STAGE):
         super().__init__(controller, character, stage)
         self.queue = []
 
@@ -809,326 +847,6 @@ Useful in lambdas where assignment is not allowed.</p></div>
 </li>
 </ul>
 </dd>
-<dt id="livemelee.LiveGameStats"><code class="flex name class">
-<span>class <span class="ident">LiveGameStats</span></span>
-<span>(</span><span>onshutdown=&lt;function LiveGameStats.&lt;lambda&gt;&gt;, commands={&#x27;f&#x27;: (&lt;function LiveGameStats._with_gamestate.&lt;locals&gt;.&lt;lambda&gt;&gt;, &#x27;frame num&#x27;), &#x27;p&#x27;: (&lt;function LiveGameStats._with_gamestate.&lt;locals&gt;.&lt;lambda&gt;&gt;, &#x27;percents&#x27;), &#x27;d&#x27;: (&lt;function LiveGameStats._with_gamestate.&lt;locals&gt;.&lt;lambda&gt;&gt;, &#x27;distance&#x27;), &#x27;a&#x27;: (&lt;function LiveGameStats._with_gamestate.&lt;locals&gt;.&lt;lambda&gt;&gt;, &#x27;action states&#x27;), &#x27;g&#x27;: (&lt;function LiveGameStats._with_gamestate.&lt;locals&gt;.&lt;lambda&gt;&gt;, &#x27;gamestate&#x27;), &#x27;m&#x27;: (&lt;function LiveGameStats._with_gamestate.&lt;locals&gt;.&lt;lambda&gt;&gt;, &#x27;menu&#x27;), &#x27;stocks&#x27;: (&lt;function LiveGameStats._with_gamestate.&lt;locals&gt;.&lt;lambda&gt;&gt;, &#x27;stocks&#x27;), &#x27;dur&#x27;: (&lt;bound method LiveGameStats._stock_duration of &lt;LiveGameStats(input-thread, initial)&gt;&gt;, &#x27;this stock duration&#x27;), &#x27;track&#x27;: (&lt;bound method LiveGameStats._track of &lt;LiveGameStats(input-thread, initial)&gt;&gt;, &#x27;print [cmd] when it updates&#x27;), &#x27;no&#x27;: (&lt;bound method LiveGameStats._reset_tracker of &lt;LiveGameStats(input-thread, initial)&gt;&gt;, &#x27;stop tracking&#x27;)})</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Enhances LiveInputsThread by incorporating stats from melee.GameState
-and adding stat-tracking / printing-on-change feature.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; track p
-&gt;&gt;&gt; Percents: 0%  0%
-&gt;&gt;&gt; Percents: 3%  0%
-&gt;&gt;&gt; Percents: 3%  16%
-&gt;&gt;&gt; notrack
-&gt;&gt;&gt; .
-&gt;&gt;&gt; a
-&gt;&gt;&gt; Action states: Action.CROUCHING  Action.LANDING
-</code></pre>
-<p>Creates parser with given commands and starts thread awaiting input.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class LiveGameStats(LiveInputsThread):
-    &#39;&#39;&#39;Enhances LiveInputsThread by incorporating stats from melee.GameState
-    and adding stat-tracking / printing-on-change feature.
-
-    &gt;&gt;&gt; track p
-    &gt;&gt;&gt; Percents: 0%  0%
-    &gt;&gt;&gt; Percents: 3%  0%
-    &gt;&gt;&gt; Percents: 3%  16%
-    &gt;&gt;&gt; notrack
-    &gt;&gt;&gt; .
-    &gt;&gt;&gt; a
-    &gt;&gt;&gt; Action states: Action.CROUCHING  Action.LANDING&#39;&#39;&#39;
-
-    def __init__(self, onshutdown=lambda:None, commands={}):
-
-        stats = {cmd: ( self._with_gamestate(func), descrip )
-             for cmd, (func, descrip) in {
-                &#39;f&#39;: (utils.frame_num, &#39;frame num&#39;),
-                &#39;p&#39;: (utils.percents, &#39;percents&#39;),
-                &#39;d&#39;: (utils.distance, &#39;distance&#39;),
-                &#39;a&#39;: (utils.actions, &#39;action states&#39;),
-                &#39;g&#39;: (utils.gamestate, &#39;gamestate&#39;),
-                &#39;m&#39;: (utils.menu, &#39;menu&#39;),
-                &#39;stocks&#39;: (utils.stocks, &#39;stocks&#39;),
-             }.items()
-        }
-        stats.update({   # don&#39;t need gamestate
-            &#39;dur&#39;: (self._stock_duration, &#39;this stock duration&#39;),
-            &#39;track&#39;: (self._track, &#39;print [cmd] when it updates&#39;),
-            &#39;no&#39;: (self._reset_tracker, &#39;stop tracking&#39;),
-        })
-        commands.update(stats)
-        self.commands = commands
-        super().__init__(onshutdown=onshutdown, commands=commands)
-
-        # any persistent/cumulative stats
-        self._stock_duration = 0     # frames
-        self._stocks = 4             # tells when to reset above
-        self._last_gamestate = None  # will provide rest of the stats
-
-        self._tracker = None        # callable, called each frame
-        self._tracked_last = None   # from above
-
-    def _with_gamestate(self, func):
-        # wrapper to pass last gamestate stored in self
-        return lambda: func(self._last_gamestate)
-
-    def update(self, gamestate):
-        &#39;&#39;&#39;Call this each frame with new gamestate to update recent stats.&#39;&#39;&#39;
-        self._last_gamestate = gamestate
-
-        # update any cumulative stats
-        if utils.in_game(gamestate):   # game started
-            self._update_stock_dur(gamestate)
-
-        if self._tracker:
-            curr = self._tracker()
-            if not curr == self._tracked_last:
-                self._tracked_last = curr
-                print(curr)
-
-    def _track(self, cmd):
-        # check cmd func each frame for change. func must takes 0 args.
-        # if custom func needs gamestate, consider wrapping _with_gamestate(func)?
-        func, _ = _unpack(self.commands[cmd])
-        self._tracker = func
-
-    def _reset_tracker(self):
-        self._tracker = None
-        self._tracked_last = None
-
-    # for specific stats
-
-    def _stock_duration(self):
-        # a cumulative stat stored in self
-        return &#39;{} sec into this stock&#39;.format(self._stock_duration // 60)   # 60 fps
-
-    def _update_stock_dur(self, gamestate):
-        curr_stocks = gamestate.player[2].stock
-        if not self._stocks == curr_stocks: # reset on new stock
-            self._stocks = curr_stocks      # -= 1
-            self._stock_duration = 0
-        else:                               # add another 1/60th sec
-            self._stock_duration += 1</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="livemelee.interact.LiveInputsThread" href="interact.html#livemelee.interact.LiveInputsThread">LiveInputsThread</a></li>
-<li>threading.Thread</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="livemelee.LiveGameStats.update"><code class="name flex">
-<span>def <span class="ident">update</span></span>(<span>self, gamestate)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Call this each frame with new gamestate to update recent stats.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update(self, gamestate):
-    &#39;&#39;&#39;Call this each frame with new gamestate to update recent stats.&#39;&#39;&#39;
-    self._last_gamestate = gamestate
-
-    # update any cumulative stats
-    if utils.in_game(gamestate):   # game started
-        self._update_stock_dur(gamestate)
-
-    if self._tracker:
-        curr = self._tracker()
-        if not curr == self._tracked_last:
-            self._tracked_last = curr
-            print(curr)</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="livemelee.interact.LiveInputsThread" href="interact.html#livemelee.interact.LiveInputsThread">LiveInputsThread</a></b></code>:
-<ul class="hlist">
-<li><code><a title="livemelee.interact.LiveInputsThread.run" href="interact.html#livemelee.interact.LiveInputsThread.run">run</a></code></li>
-</ul>
-</li>
-</ul>
-</dd>
-<dt id="livemelee.LiveInputsThread"><code class="flex name class">
-<span>class <span class="ident">LiveInputsThread</span></span>
-<span>(</span><span>onshutdown=&lt;function LiveInputsThread.&lt;lambda&gt;&gt;, commands={})</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Invoke functions in a shell session during gameplay.
-Similar to a command line parser but streamlined experience, no flags.
-Used for live debugging or injecting commands to gameplay.
-Commands should not print anything themselves - just return string/data, if anything.</p>
-<p>Commands format: <code>{'cmd': func}</code> or better <code>{'cmd': (func, 'descrip/directions')}</code></p>
-<p>Ex:</p>
-<pre><code>live_thread = LiveInputsThread(         # init before starting game
-    onshutdown=stop_everything,
-    commands={
-        'status': lambda: bot.status,
-        'connect': (bot.direct_connect, 'direct connect to [code]'),
-        'A': controller.press_a,
-        'moveto': (bot.move, 'move bot to [x] [y] coords'),
-        'seq': (bot.loop_inputs, 'repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]'),
-    })
-</code></pre>
-<p>[&hellip;this thread is waiting and game loop is started&hellip;]</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; connect PLUP#123
-&gt;&gt;&gt; moveto 10 40
-&gt;&gt;&gt; status
-&gt;&gt;&gt;   Bot status: ...
-&gt;&gt;&gt; seq b down 3 y release
-&gt;&gt;&gt; quit
-</code></pre>
-<p>Creates parser with given commands and starts thread awaiting input.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class LiveInputsThread(threading.Thread):
-    &#39;&#39;&#39;Invoke functions in a shell session during gameplay.
-    Similar to a command line parser but streamlined experience, no flags.
-    Used for live debugging or injecting commands to gameplay.
-    Commands should not print anything themselves - just return string/data, if anything.
-
-    Commands format: `{&#39;cmd&#39;: func}` or better `{&#39;cmd&#39;: (func, &#39;descrip/directions&#39;)}`
-
-    Ex:
-    ```
-    live_thread = LiveInputsThread(         # init before starting game
-        onshutdown=stop_everything,
-        commands={
-            &#39;status&#39;: lambda: bot.status,
-            &#39;connect&#39;: (bot.direct_connect, &#39;direct connect to [code]&#39;),
-            &#39;A&#39;: controller.press_a,
-            &#39;moveto&#39;: (bot.move, &#39;move bot to [x] [y] coords&#39;),
-            &#39;seq&#39;: (bot.loop_inputs, &#39;repeat inputs [a/b/x/y/l/r/z] [up/down/left/right] [release] [n wait]&#39;),
-        })
-    ```
-    [...this thread is waiting and game loop is started...]
-    &gt;&gt;&gt; connect PLUP#123
-    &gt;&gt;&gt; moveto 10 40
-    &gt;&gt;&gt; status
-    &gt;&gt;&gt;   Bot status: ...
-    &gt;&gt;&gt; seq b down 3 y release
-    &gt;&gt;&gt; quit&#39;&#39;&#39;
-
-    def __init__(self, onshutdown=lambda:None, commands={}):
-        &#39;&#39;&#39;Creates parser with given commands and starts thread awaiting input.&#39;&#39;&#39;
-        parser = argparse.ArgumentParser(prog=&#39;&#39;,           # program name would distract
-                                         description=&#39;Perform commands during gameplay.&#39;,
-                                         add_help=False)    # we have custom help arg, not &#34;-help&#34;
-        meta_commands = {
-            &#39;test&#39;: (lambda *s:&#39;You typed {} arg(s): {}&#39;.format(len(s), s), &#39;test [extra] [args] ...&#39;),
-            &#39;help&#39;: parser.print_help,  # ideally help and quit dont get wrapped in _print and _accept_args
-            &#39;quit&#39;: lambda: BREAK_FLAG  #   when it happens in _add_commands
-        }                               #   but oh well
-
-        subparser_adder = parser.add_subparsers()
-        for command, details in {**commands, **meta_commands}.items():
-            _add_command(subparser_adder, command, details)
-            # type(self)._add_command(subparser_adder, command, details)   # allow subclassing?
-
-        self.parser = parser
-        self.onshutdown = onshutdown    # callable
-        # signal.signal(signal.SIGINT, lambda sig, frame: self.shutdown)  # ctrl-c interrupt
-
-        super().__init__(name=&#39;input-thread&#39;)
-        # self.start()    # maybe save for caller to start when they want?
-
-    def run(self):
-        &#39;&#39;&#39;Start this thread waiting for user inputs, exiting program if asked.&#39;&#39;&#39;
-        self.parser.print_help()
-
-        while True: # wait for next input
-            try:
-                args = self.parser.parse_args(args=_separate(input()))
-                # perform command
-                if args.func(args) == BREAK_FLAG:
-                    print(&#39;Stopping thread...&#39;)
-                    break
-
-            except SystemExit as e: # thrown whenever parser doesn&#39;t like input
-                # print(&#39;Bad command:&#39;, e)
-                continue
-            except TypeError as e:  # probably from bad command args, eg. &gt;&gt;&gt; help something
-                print(&#39;Bad command extra args:&#39;, e)
-                continue
-            # thrown when ctrl-c interrupts hanging input() -
-            # except (KeyboardInterrupt, EOFError, Exception) as e:
-            #     break
-
-        self.onshutdown()
-
-    def update(self, gamestate):
-        &#39;&#39;&#39;Override this if you want to check something each frame.&#39;&#39;&#39;
-        pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>threading.Thread</li>
-</ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="livemelee.interact.LiveGameStats" href="interact.html#livemelee.interact.LiveGameStats">LiveGameStats</a></li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="livemelee.LiveInputsThread.run"><code class="name flex">
-<span>def <span class="ident">run</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Start this thread waiting for user inputs, exiting program if asked.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def run(self):
-    &#39;&#39;&#39;Start this thread waiting for user inputs, exiting program if asked.&#39;&#39;&#39;
-    self.parser.print_help()
-
-    while True: # wait for next input
-        try:
-            args = self.parser.parse_args(args=_separate(input()))
-            # perform command
-            if args.func(args) == BREAK_FLAG:
-                print(&#39;Stopping thread...&#39;)
-                break
-
-        except SystemExit as e: # thrown whenever parser doesn&#39;t like input
-            # print(&#39;Bad command:&#39;, e)
-            continue
-        except TypeError as e:  # probably from bad command args, eg. &gt;&gt;&gt; help something
-            print(&#39;Bad command extra args:&#39;, e)
-            continue
-        # thrown when ctrl-c interrupts hanging input() -
-        # except (KeyboardInterrupt, EOFError, Exception) as e:
-        #     break
-
-    self.onshutdown()</code></pre>
-</details>
-</dd>
-<dt id="livemelee.LiveInputsThread.update"><code class="name flex">
-<span>def <span class="ident">update</span></span>(<span>self, gamestate)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Override this if you want to check something each frame.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update(self, gamestate):
-    &#39;&#39;&#39;Override this if you want to check something each frame.&#39;&#39;&#39;
-    pass</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
 </dl>
 </section>
 </article>
@@ -1137,8 +855,9 @@ Commands should not print anything themselves - just return string/data, if anyt
 <div class="toc">
 <ul>
 <li><a href="#quick-example">Quick Example</a></li>
-<li><a href="#importable-from-livemelee">Importable from livemelee</a></li>
-<li><a href="#general-flow">General flow</a></li>
+<li><a href="#components-of-livemelee">Components of livemelee</a></li>
+<li><a href="#an-example-step-by-step">An example, step-by-step</a></li>
+<li><a href="#a-deeper-look">A deeper look</a></li>
 <li><a href="#more">More</a></li>
 </ul>
 </div>
@@ -1147,8 +866,6 @@ Commands should not print anything themselves - just return string/data, if anyt
 <ul>
 <li><code><a title="livemelee.bots" href="bots.html">livemelee.bots</a></code></li>
 <li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code></li>
-<li><code><a title="livemelee.interact" href="interact.html">livemelee.interact</a></code></li>
-<li><code><a title="livemelee.startup" href="startup.html">livemelee.startup</a></code></li>
 <li><code><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code></li>
 </ul>
 </li>
@@ -1189,19 +906,6 @@ Commands should not print anything themselves - just return string/data, if anyt
 <li><code><a title="livemelee.InputsBot.check_frame" href="#livemelee.InputsBot.check_frame">check_frame</a></code></li>
 <li><code><a title="livemelee.InputsBot.consume_next_inputs" href="#livemelee.InputsBot.consume_next_inputs">consume_next_inputs</a></code></li>
 <li><code><a title="livemelee.InputsBot.perform" href="#livemelee.InputsBot.perform">perform</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="livemelee.LiveGameStats" href="#livemelee.LiveGameStats">LiveGameStats</a></code></h4>
-<ul class="">
-<li><code><a title="livemelee.LiveGameStats.update" href="#livemelee.LiveGameStats.update">update</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="livemelee.LiveInputsThread" href="#livemelee.LiveInputsThread">LiveInputsThread</a></code></h4>
-<ul class="">
-<li><code><a title="livemelee.LiveInputsThread.run" href="#livemelee.LiveInputsThread.run">run</a></code></li>
-<li><code><a title="livemelee.LiveInputsThread.update" href="#livemelee.LiveInputsThread.update">update</a></code></li>
 </ul>
 </li>
 </ul>

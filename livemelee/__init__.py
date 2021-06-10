@@ -21,8 +21,13 @@ from .bots import Bot, InputsBot, CheckBot, ControllableBot
 
 __all__ = [
     'start_game',
-    'LiveGameStats',
+    # 'LiveGameStats',
     'Bot', 'InputsBot', 'CheckBot', 'ControllableBot',
     'inputs',
     'utils',
 ]
+
+__pdoc__ = {
+    'interact': False,
+    'startup': False,
+}

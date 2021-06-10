@@ -31,7 +31,7 @@ def _get_analogs(controller_state):
     L = controller_state.l_shoulder
     return x, y, L
 
-class PortBot:
+class _PortBot:
     def __init__(self):
         self.controller = None
         self.character = DEFAULT_CHAR
@@ -133,7 +133,7 @@ class PortBot:
 
 
 class Bot:
-    '''Framework for making controller inputs.
+    '''Framework for making controller inputs according to gamestate.
     Offline only implementation currently.
 
     Attributes:
@@ -220,7 +220,7 @@ class CheckBot(InputsBot):
     '''Adds condition checker to main loop.
 
     Attributes:
-        when: (ie trigger) condition called every frame (func taking gamestate)
+        when: (ie trigger) a condition checked every frame (func taking gamestate)
 
         do: (ie on_trigger) func called when condition returns True
 
@@ -461,7 +461,7 @@ def _with_ports(self, func):
         return func(gamestate, self.my_port, self.opp_port)
     return stat_with_ports
 
-def detect_ports(self, gamestate):
+def _detect_ports(self, gamestate):
     # melee.GameState.port_detector(gamestate, self.character, self.costume)
     players = gamestate.player.items()
 

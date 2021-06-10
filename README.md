@@ -39,7 +39,8 @@ ___
 - [ ] Generalize for other ports and online connection
   - [ ] investigate same-char-costume port detection solution
     - [ ] generate list of processed joystick inputs ( `for .2f x,y in range(1) set_stick(x,y) -> processed_inputs_set.add(gamestate.controller(x,y))` ). Game has particular zones like that hax document showed, eg `(0.5, .6875)`, `(0.125, 0.5)`, etc
-- [ ] don't expose any liveinputs class but just give cmds to start_game
+- [x] don't expose any liveinputs class but just give cmds to start_game
+- [ ] investigate `cmd.Cmd` instead of argparse
 - [ ] Unit tests
 - [ ] Test on Linux, OSX
 - [x] refactor misc tidbits as utils submodule?

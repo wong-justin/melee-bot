@@ -23,16 +23,17 @@
 </header>
 <section id="section-intro">
 <p>Wrapping <code>melee.Button</code> enums for easy sequences and consumption (see usage in bots).</p>
-<p>Only custom press will be sticks - <code>(True, melee.Button.WHICH_STICK, x, y)</code>.
+<p>Main need for custom press will be sticks - <code>(True, melee.Button.WHICH_STICK, x, y)</code>.
 All other presses are constants in this module (eg. <code>A</code>, <code>up</code>, <code>release</code>).</p>
 <p>Included are some funcs returning premade sequences (eg. <code><a title="livemelee.inputs.dashdance" href="#livemelee.inputs.dashdance">dashdance()</a></code>)
-Make your own sequences by making a list of presses - see funcs for examples.</p>
-<h3 id="rulesformat-for-inputs">Rules/format for inputs:</h3>
+Make your own sequences by making a list of presses - see funcs for examples.
+Unpack sequences in other sequences with *.</p>
+<h3 id="format-for-inputs">Format for inputs:</h3>
 <p>Representing a single input - <code>tuple</code>:</p>
 <ul>
 <li><code>(True, btn, x, y)</code>
 tilt_analog</li>
-<li>!! forgot L/R, whoops. <code>(True, btn, float)</code> will likely be the format.</li>
+<li>!! forgot L/R analog vals, whoops. <code>(True, btn, float)</code> will likely be the format.</li>
 <li><code>(True, btn)</code>
 press_btn</li>
 <li><code>(False, btn)</code>
@@ -62,18 +63,19 @@ no inputs this frame.</li>
 </summary>
 <pre><code class="python">&#39;&#39;&#39;Wrapping `melee.Button` enums for easy sequences and consumption (see usage in bots).
 
-Only custom press will be sticks - `(True, melee.Button.WHICH_STICK, x, y)`.
+Main need for custom press will be sticks - `(True, melee.Button.WHICH_STICK, x, y)`.
 All other presses are constants in this module (eg. `A`, `up`, `release`).
 
 Included are some funcs returning premade sequences (eg. `dashdance()`)
 Make your own sequences by making a list of presses - see funcs for examples.
+Unpack sequences in other sequences with *.
 
-### Rules/format for inputs:
+### Format for inputs:
 
 Representing a single input - `tuple`:
 
 - `(True, btn, x, y)`   tilt_analog
-- !! forgot L/R, whoops. `(True, btn, float)` will likely be the format.
+- !! forgot L/R analog vals, whoops. `(True, btn, float)` will likely be the format.
 - `(True, btn)`         press_btn
 - `(False, btn)`        release_btn
 - `(False,)`            release_all
@@ -99,7 +101,11 @@ from melee import Button
 import random
 
 def make_inputs(inputs, controller):
-    # press given buttons for this frame
+    &#39;&#39;&#39;Press given buttons for this frame. Used in bots.
+
+    Args:
+        inputs: tuple of button inputs for this frame
+        controller: `melee.Controller` to be pressed &#39;&#39;&#39;
     for press, *button_args in inputs:
         if len(button_args) &gt; 1:    # (True, btn_stick, x, y)
             controller.tilt_analog(*button_args)
@@ -116,11 +122,11 @@ def make_inputs(inputs, controller):
 def wait(n):
     &#39;&#39;&#39;Gives n frames of no inputs. Use * to unpack in sequence.
     &gt;&gt;&gt; inputs = [
-    &gt;&gt;&gt;     ...,
     &gt;&gt;&gt;     *wait(3),
+    &gt;&gt;&gt;     ...
     &gt;&gt;&gt; ]
 
-    &gt;&gt;&gt; [..., (), (), (),]&#39;&#39;&#39;
+    &gt;&gt;&gt; [(), (), (), ...]&#39;&#39;&#39;
     return [()] * n
     # return [()for _ in range(n)]
 
@@ -352,13 +358,24 @@ def dashdance():
 <span>def <span class="ident">make_inputs</span></span>(<span>inputs, controller)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Press given buttons for this frame. Used in bots.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>tuple of button inputs for this frame</dd>
+<dt><strong><code>controller</code></strong></dt>
+<dd><code>melee.Controller</code> to be pressed</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def make_inputs(inputs, controller):
-    # press given buttons for this frame
+    &#39;&#39;&#39;Press given buttons for this frame. Used in bots.
+
+    Args:
+        inputs: tuple of button inputs for this frame
+        controller: `melee.Controller` to be pressed &#39;&#39;&#39;
     for press, *button_args in inputs:
         if len(button_args) &gt; 1:    # (True, btn_stick, x, y)
             controller.tilt_analog(*button_args)
@@ -455,11 +472,11 @@ Use * to unpack in sequence.</p>
 <dd>
 <div class="desc"><p>Gives n frames of no inputs. Use * to unpack in sequence.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; inputs = [
-&gt;&gt;&gt;     ...,
 &gt;&gt;&gt;     *wait(3),
+&gt;&gt;&gt;     ...
 &gt;&gt;&gt; ]
 </code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; [..., (), (), (),]
+<pre><code class="language-python-repl">&gt;&gt;&gt; [(), (), (), ...]
 </code></pre></div>
 <details class="source">
 <summary>
@@ -468,11 +485,11 @@ Use * to unpack in sequence.</p>
 <pre><code class="python">def wait(n):
     &#39;&#39;&#39;Gives n frames of no inputs. Use * to unpack in sequence.
     &gt;&gt;&gt; inputs = [
-    &gt;&gt;&gt;     ...,
     &gt;&gt;&gt;     *wait(3),
+    &gt;&gt;&gt;     ...
     &gt;&gt;&gt; ]
 
-    &gt;&gt;&gt; [..., (), (), (),]&#39;&#39;&#39;
+    &gt;&gt;&gt; [(), (), (), ...]&#39;&#39;&#39;
     return [()] * n</code></pre>
 </details>
 </dd>
@@ -485,7 +502,7 @@ Use * to unpack in sequence.</p>
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#rulesformat-for-inputs">Rules/format for inputs:</a></li>
+<li><a href="#format-for-inputs">Format for inputs:</a></li>
 </ul>
 </div>
 <ul id="index">
