@@ -7,7 +7,7 @@ An easier way to develop a SSBM bot. Built off [libmelee](https://github.com/alt
 ## Features
 
 - Interact with gameplay: track stats, debug gamestates, control bot
-- `start_game()` covers everything from Dolphin startup to Ready, Go!
+- `start_game()` covers everything from Dolphin startup to _Ready, Go!_
 - Bot classes let you focus on making gameplay strategies
 - Simple inputs framework for making button presses and sequences
 
@@ -23,14 +23,23 @@ from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 ```
 
+#### Dolphin
+- add necessary gecko codes by replacing old `dolphinpath/Sys/GameSettings/GALE01r2.ini` with [this one](https://raw.githubusercontent.com/altf4/slippi-ssbm-asm/libmelee/Output/Netplay/GALE01r2.ini)
+  - I recommend keeping the `GALE01r2.ini` around just in case
+- set your default Dolphin ISO to be melee, and have it open on Dolphin startup
+
 #### Run
-`python main.py "path/to/dolphin/folder"`
+`python main.py "path/to/folder/containing/dolphin"`
 
 See [demo.py](demo/demo.py) for all-around usage,
 or [botless_demo.py](demo/botless_demo.py) for just hooking into gameplay.
 
 ## Docs
 https://wong-justin.github.io/melee-bot/
+
+#### Still not working?
+
+Check the more detailed [libmelee setup instructions](https://github.com/altf4/libmelee#setup-instructions). If that doesn't help, leave an issue here if something is broken or not clear. I'm still tidying up code and documentation, which may have left out an important detail.
 
 ___
 

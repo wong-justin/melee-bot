@@ -97,15 +97,23 @@ Eg: humans play in ports 1,2 so a realtime parser in port 3 or 4 can make callba
 <p>The base class <code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code> implements <code>act</code> with menu navigation (from libmelee) so only <code>play_frame</code> is to be implemented for actual gameplay. Other <code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code> subclasses scaffold off that, such as how <code><a title="livemelee.InputsBot" href="#livemelee.InputsBot">InputsBot</a></code> gives you <code>check_frame</code> so you can <code>perform</code> inputs.</p>
 <hr>
 <p>The other feature of <code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> is realtime commands. After <code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> is called and opens Dolphin, a thread is opened in your terminal for typing commands. There's two default commands: <code>help</code>, which shows available commands, and <code>quit</code>, which closes the thread and Dolphin. You can make new commands with the format <code>command: function</code> or <code>command: (function, description)</code>. The result of <code>function()</code> is printed when <code>command</code> is entered.</p>
-<p>Notes on commands:
-- After a command, a period <code>.</code> is printed on a newline as a visual confirmation.
-- You could make a command function that takes multiple args. eg.<br>
+<p>Notes on commands:</p>
+<ul>
+<li>After a command, a period <code>.</code> is printed on a newline as a visual confirmation.</li>
+<li>
+<p>You could make a command function that takes multiple args. eg.<br>
 <code>&gt;&gt;&gt; cmd a b 10</code> would call <code>func_for_cmd('a','b','10')</code><br>
-But there's limitations because of <code>argparse</code>:
-- args can't start with "-" (RIP negatives) (it triggers parser unrecognized flag)
-- args will always be strings
-- <code>quit</code> causes some not-so-pretty error output, but Dolphin still closes fine.
-- <code>Ctrl-C</code> keyboard interrupt won't close cleanly (Dolphin will stay open). You should only use the <code>quit</code> command.</p>
+But there's limitations because of <code>argparse</code>:</p>
+<ul>
+<li>args can't start with "-" (RIP negatives) (because it triggers parser unrecognized flag)</li>
+<li>args will always be strings</li>
+</ul>
+</li>
+<li>
+<p><code>quit</code> causes some not-so-pretty error output, but Dolphin still closes fine.</p>
+</li>
+<li><code>Ctrl-C</code> keyboard interrupt won't close cleanly (Dolphin will stay open). You should only use the <code>quit</code> command.</li>
+</ul>
 <h2 id="more">More</h2>
 <p>Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!</p>
 <p>Read up on the API that <code><a title="livemelee" href="#livemelee">livemelee</a></code> wraps around, <a href="https://github.com/altf4/libmelee">libmelee</a>; get to know GameState, PlayerState, Controller, etc.</p>

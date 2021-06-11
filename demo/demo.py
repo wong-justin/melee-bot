@@ -1,6 +1,6 @@
 '''Demo of input making, bot creation, and game start.'''
 
-from livemelee import start_game, Bot, CheckBot, LiveGameStats, utils
+from livemelee import start_game, Bot, CheckBot, utils
 from livemelee.inputs import *  # alternative to `from livemelee import Inputs`
                                 #  and then using Inputs.down, etc
 # one line demo!

@@ -86,12 +86,15 @@ ___
 The other feature of `start_game` is realtime commands. After `start_game` is called and opens Dolphin, a thread is opened in your terminal for typing commands. There's two default commands: `help`, which shows available commands, and `quit`, which closes the thread and Dolphin. You can make new commands with the format `command: function` or `command: (function, description)`. The result of `function()` is printed when `command` is entered.
 
 Notes on commands:
+
 - After a command, a period `.` is printed on a newline as a visual confirmation.
 - You could make a command function that takes multiple args. eg.  
 `>>> cmd a b 10` would call `func_for_cmd('a','b','10')`  
 But there's limitations because of `argparse`:
-  - args can't start with "-" (RIP negatives) (it triggers parser unrecognized flag)
-  - args will always be strings
+
+    - args can't start with "-" (RIP negatives) (because it triggers parser unrecognized flag)
+    - args will always be strings
+
 - `quit` causes some not-so-pretty error output, but Dolphin still closes fine.
 - `Ctrl-C` keyboard interrupt won't close cleanly (Dolphin will stay open). You should only use the `quit` command.
 
