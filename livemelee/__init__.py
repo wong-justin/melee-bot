@@ -7,7 +7,7 @@ from . import utils
 from . import inputs
 
 from .startup import start_game
-from .interact import LiveGameStats
+# from .interact import LiveGameStats
 from .bots import Bot, InputsBot, CheckBot, ControllableBot
 
 # __pdoc__ = {obj: True for obj in (

@@ -13,6 +13,11 @@ An easier way to develop a SSBM bot. Built off [libmelee](https://github.com/alt
 
 ## Quickstart
 
+#### Dolphin
+- add necessary gecko codes by replacing old `dolphinpath/Sys/GameSettings/GALE01r2.ini` with [this one](https://raw.githubusercontent.com/altf4/slippi-ssbm-asm/libmelee/Output/Netplay/GALE01r2.ini)
+  - I recommend keeping the original `GALE01r2.ini` around just in case
+  - ... or if you haven't done so already, dedicate a second Dolphin installation for development separate from your personal playtime Dolphin.
+
 #### Install
 `pip install -e git+https://github.com/wong-justin/melee-bot.git#egg=livemelee`
 
@@ -23,13 +28,8 @@ from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 ```
 
-#### Dolphin
-- add necessary gecko codes by replacing old `dolphinpath/Sys/GameSettings/GALE01r2.ini` with [this one](https://raw.githubusercontent.com/altf4/slippi-ssbm-asm/libmelee/Output/Netplay/GALE01r2.ini)
-  - I recommend keeping the `GALE01r2.ini` around just in case
-- set your default Dolphin ISO to be melee, and have it open on Dolphin startup
-
 #### Run
-`python main.py "path/to/folder/containing/dolphin"`
+`python main.py "path/to/dolphin" "path/to/iso"`
 
 See [demo.py](demo/demo.py) for all-around usage,
 or [botless_demo.py](demo/botless_demo.py) for just hooking into gameplay.
@@ -64,6 +64,9 @@ ___
 - [ ] clean up docs formatting
   - [ ] replace documentation.md with formatted docstring in livemelee__init__
     - [ ] setup script replaces docstring?
+- [ ] make a framework for custom menu nav?
+  - [ ] eg. to change from 4 stock to inifinite time (good for training ML)
+  - [ ] or eg. move cursor to new stage icon locations in crystal melee iso
 - [ ] Make a semi-playable bot
 - [ ] Sidequest - train a bot with machine learning
   - [ ] gather training dataset of replays

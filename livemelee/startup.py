@@ -1,18 +1,21 @@
 '''Create entry point to init everything and start Dolphin.'''
 
 import argparse
+# import sys
+from pathlib import Path
 import melee
 from .interact import LiveInputsThread
 
 def start_game(ports, cmds={}, log=True):
     '''Main method to fully start game.
-    Command-line first needs dolphin folder path, then game starts.
+    Command-line first needs dolphin path and iso path, then game starts.
+    Iso path is optional if you have a default iso set to run on Dolphin startup.
     ```
     # main.py
     ...
     start_game(...)
     ```
-    `python main.py path/to/dolphin`
+    `python main.py path/to/dolphin path/to/iso`
 
     Args:
         ports: tuple containing 4 bot instances or Nones.
@@ -28,22 +31,23 @@ def start_game(ports, cmds={}, log=True):
         log: `bool`, write game logs to file with `melee.Logger` if True (default)'''
 
     args = _start_command_line()
-    console = melee.Console(path=args.path)
+    dolphin_folder = str( Path(args.dolphin_path).parent )
+    console = melee.Console(path=dolphin_folder) # libmelee wants the folder
 
     # controllers must be connected before console run/connect...
     bots = _assign_controllers(ports, console)
 
-    console.run()
+    console.run(iso_path=args.iso_path) # if None, relies on default Dolphin iso on startup
     console.connect()
 
-    # ... and connected after
+    # ... and then controllers are connected afterward
     _connect_controllers(bots)
 
     logger = melee.Logger() if log else None
 
     live_interface = None
     if cmds is not None:
-        live_interface = LiveInputsThread(commands=cmds)    # LiveGameStats
+        live_interface = LiveInputsThread(commands=cmds)
         live_interface.onshutdown = _shutdown(console, logger)
         live_interface.start()
 
@@ -65,10 +69,14 @@ def start_game(ports, cmds={}, log=True):
             logger.writeframe()
 
 def _start_command_line():
-    # simple CLI to get dolphin folder path
+    # simple CLI to get paths for dolphin and optionally iso
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('path', help='dolphin folder')
-    return parser.parse_args()
+    parser.add_argument('paths', nargs='+', help='dolphin/path [iso/path]')
+    args = parser.parse_args()
+    args.dolphin_path = args.paths[0]
+    args.iso_path = args.paths[1] if len(args.paths) > 1 else None
+    return args
 
 def _assign_controllers(ports, console):
     # make + give controllers to any bots present in 4-tuple of ports

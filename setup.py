@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="livemelee",
-    version="0.2.0",
+    version="0.3.0",
     author="Justin Wong",
     author_email="jkwongfl@yahoo.com",
     description="An easier way to develop a SSBM bot. Built off libmelee.",

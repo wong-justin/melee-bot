@@ -1,6 +1,11 @@
 
 This package aims to make a simpler API around `libmelee` and make it easier to start implementing your gameplay ideas.
 
+
+## Before you start
+
+Make sure you follow the brief [setup](https://github.com/wong-justin/melee-bot#quickstart) outlined in the repo - mostly just be sure to have the necessary gecko codes for Dolphin. If you still can't run the quick example, leave an issue on github.
+
 ## Quick Example
 ```python
 # main.py
@@ -8,15 +13,9 @@ from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 ```
 
-`python main.py "path/to/dolphin/folder"`
+`python main.py "path/to/dolphin/" "path/to/iso"`
 
-## Components of `livemelee`
-- `start_game` - function handling Dolphin startup to get in-game
-- Different `Bot` classes to use or extend
-- `inputs` module - framework for pressing buttons
-- `utils` module - misc, eg. pretty prints
-
-## An example, step-by-step
+## Less trivial example, a breakdown
 A typical development case might look like:
 
 - Create a bot and implement its main loop method:
@@ -58,7 +57,14 @@ commands = {
 # from livemelee import start_game
 start_game((None, bot, None, None), commands)
 ```
-- Run on command line, passing dolphin path: `python main.py "path/to/dolphin/folder"`
+- Run on command line, passing dolphin path and iso path: `python main.py "path/to/dolphin/executable" "path/to/ssbm/iso"`
+
+
+## Components of `livemelee`
+- `start_game` - function handling Dolphin startup to get in-game
+- Different `Bot` classes to use or extend
+- `inputs` module - framework for pressing buttons
+- `utils` module - misc, eg. pretty prints
 
 
 ## A deeper look
@@ -98,8 +104,18 @@ But there's limitations because of `argparse`:
 - `quit` causes some not-so-pretty error output, but Dolphin still closes fine.
 - `Ctrl-C` keyboard interrupt won't close cleanly (Dolphin will stay open). You should only use the `quit` command.
 
+___
+
+Notes on running the script:
+- example: `python main.py "melee\stuff\FM-Slippi-2.3.0-Win\FM-Slippi\Slippi Dolphin.exe" "melee\stuff\Super Smash Bros. Melee (USA) (En,Ja) (v1.02).iso"
+`
+- Dolphin path is to the executable, as opposed to the containing folder that libmelee wants. (I think it feels more intuitive this way)
+- ISO path is optional if you have a default iso set to run on Dolphin startup
+- Recommended - copy this command into a little script for quick reference in your working directory, eg. `run.bat`
+
 
 ## More
 Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!
 
-Read up on the API that `livemelee` wraps around, [libmelee](https://github.com/altf4/libmelee); get to know GameState, PlayerState, Controller, etc.
+Read up on the API that `livemelee` wraps around: [libmelee](https://github.com/altf4/libmelee)
+- get to know [GameState](https://libmelee.readthedocs.io/en/latest/gamestate.html), [PlayerState](https://libmelee.readthedocs.io/en/latest/gamestate.html#melee.gamestate.PlayerState), Controller, etc.
