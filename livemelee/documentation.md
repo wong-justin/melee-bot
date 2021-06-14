@@ -93,7 +93,7 @@ The other feature of `start_game` is realtime commands. After `start_game` is ca
 
 Notes on commands:
 
-- After a command, a period `.` is printed on a newline as a visual confirmation.
+- After executing a command, a period `.` is printed on a newline as a visual confirmation.
 - You could make a command function that takes multiple args. eg.  
 `>>> cmd a b 10` would call `func_for_cmd('a','b','10')`  
 But there's limitations because of `argparse`:

@@ -24,20 +24,15 @@
 <section id="section-intro">
 <p>An easier way to develop a SSBM bot. Built off libmelee.</p>
 <p>This package aims to make a simpler API around <code>libmelee</code> and make it easier to start implementing your gameplay ideas.</p>
+<h2 id="before-you-start">Before you start</h2>
+<p>Make sure you follow the brief <a href="https://github.com/wong-justin/melee-bot#quickstart">setup</a> outlined in the repo - mostly just be sure to have the necessary gecko codes for Dolphin. If you still can't run the quick example, leave an issue on github.</p>
 <h2 id="quick-example">Quick Example</h2>
 <pre><code class="language-python"># main.py
 from livemelee import start_game, Bot
 start_game((Bot(), Bot(), None, None))
 </code></pre>
-<p><code>python main.py "path/to/dolphin/folder"</code></p>
-<h2 id="components-of-livemelee">Components of <code><a title="livemelee" href="#livemelee">livemelee</a></code></h2>
-<ul>
-<li><code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> - function handling Dolphin startup to get in-game</li>
-<li>Different <code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code> classes to use or extend</li>
-<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> module - framework for pressing buttons</li>
-<li><code><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code> module - misc, eg. pretty prints</li>
-</ul>
-<h2 id="an-example-step-by-step">An example, step-by-step</h2>
+<p><code>python main.py "path/to/dolphin/" "path/to/iso"</code></p>
+<h2 id="less-trivial-example-a-breakdown">Less trivial example, a breakdown</h2>
 <p>A typical development case might look like:</p>
 <ul>
 <li>Create a bot and implement its main loop method:</li>
@@ -79,7 +74,14 @@ commands = {
 start_game((None, bot, None, None), commands)
 </code></pre>
 <ul>
-<li>Run on command line, passing dolphin path: <code>python main.py "path/to/dolphin/folder"</code></li>
+<li>Run on command line, passing dolphin path and iso path: <code>python main.py "path/to/dolphin/executable" "path/to/ssbm/iso"</code></li>
+</ul>
+<h2 id="components-of-livemelee">Components of <code><a title="livemelee" href="#livemelee">livemelee</a></code></h2>
+<ul>
+<li><code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> - function handling Dolphin startup to get in-game</li>
+<li>Different <code><a title="livemelee.Bot" href="#livemelee.Bot">Bot</a></code> classes to use or extend</li>
+<li><code><a title="livemelee.inputs" href="inputs.html">livemelee.inputs</a></code> module - framework for pressing buttons</li>
+<li><code><a title="livemelee.utils" href="utils.html">livemelee.utils</a></code> module - misc, eg. pretty prints</li>
 </ul>
 <h2 id="a-deeper-look">A deeper look</h2>
 <p>Behind the scenes, <code><a title="livemelee.start_game" href="#livemelee.start_game">start_game()</a></code> implements Dolphin startup with libmelee.
@@ -114,9 +116,16 @@ But there's limitations because of <code>argparse</code>:</p>
 </li>
 <li><code>Ctrl-C</code> keyboard interrupt won't close cleanly (Dolphin will stay open). You should only use the <code>quit</code> command.</li>
 </ul>
+<hr>
+<p>Notes on running the script:
+- example: <code>python main.py "melee\stuff\FM-Slippi-2.3.0-Win\FM-Slippi\Slippi Dolphin.exe" "melee\stuff\Super Smash Bros. Melee (USA) (En,Ja) (v1.02).iso"</code>
+- Dolphin path is to the executable, as opposed to the containing folder that libmelee wants. (I think it feels more intuitive this way)
+- ISO path is optional if you have a default iso set to run on Dolphin startup
+- Recommended - copy this command into a little script for quick reference in your working directory, eg. <code>run.bat</code></p>
 <h2 id="more">More</h2>
 <p>Only offline play is supported for now, mainly assuming ports 1 + 2. Soon to change!</p>
-<p>Read up on the API that <code><a title="livemelee" href="#livemelee">livemelee</a></code> wraps around, <a href="https://github.com/altf4/libmelee">libmelee</a>; get to know GameState, PlayerState, Controller, etc.</p>
+<p>Read up on the API that <code><a title="livemelee" href="#livemelee">livemelee</a></code> wraps around: <a href="https://github.com/altf4/libmelee">libmelee</a>
+- get to know <a href="https://libmelee.readthedocs.io/en/latest/gamestate.html">GameState</a>, <a href="https://libmelee.readthedocs.io/en/latest/gamestate.html#melee.gamestate.PlayerState">PlayerState</a>, Controller, etc.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -130,7 +139,7 @@ from . import utils
 from . import inputs
 
 from .startup import start_game
-from .interact import LiveGameStats
+# from .interact import LiveGameStats
 from .bots import Bot, InputsBot, CheckBot, ControllableBot
 
 # __pdoc__ = {obj: True for obj in (
@@ -183,12 +192,13 @@ __pdoc__ = {
 </code></dt>
 <dd>
 <div class="desc"><p>Main method to fully start game.
-Command-line first needs dolphin folder path, then game starts.</p>
+Command-line first needs dolphin path and iso path, then game starts.
+Iso path is optional if you have a default iso set to run on Dolphin startup.</p>
 <pre><code># main.py
 ...
 start_game(...)
 </code></pre>
-<p><code>python main.py path/to/dolphin</code></p>
+<p><code>python main.py path/to/dolphin path/to/iso</code></p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>ports</code></strong></dt>
@@ -214,13 +224,14 @@ start_game(...)
 </summary>
 <pre><code class="python">def start_game(ports, cmds={}, log=True):
     &#39;&#39;&#39;Main method to fully start game.
-    Command-line first needs dolphin folder path, then game starts.
+    Command-line first needs dolphin path and iso path, then game starts.
+    Iso path is optional if you have a default iso set to run on Dolphin startup.
     ```
     # main.py
     ...
     start_game(...)
     ```
-    `python main.py path/to/dolphin`
+    `python main.py path/to/dolphin path/to/iso`
 
     Args:
         ports: tuple containing 4 bot instances or Nones.
@@ -236,22 +247,23 @@ start_game(...)
         log: `bool`, write game logs to file with `melee.Logger` if True (default)&#39;&#39;&#39;
 
     args = _start_command_line()
-    console = melee.Console(path=args.path)
+    dolphin_folder = str( Path(args.dolphin_path).parent )
+    console = melee.Console(path=dolphin_folder) # libmelee wants the folder
 
     # controllers must be connected before console run/connect...
     bots = _assign_controllers(ports, console)
 
-    console.run()
+    console.run(iso_path=args.iso_path) # if None, relies on default Dolphin iso on startup
     console.connect()
 
-    # ... and connected after
+    # ... and then controllers are connected afterward
     _connect_controllers(bots)
 
     logger = melee.Logger() if log else None
 
     live_interface = None
     if cmds is not None:
-        live_interface = LiveInputsThread(commands=cmds)    # LiveGameStats
+        live_interface = LiveInputsThread(commands=cmds)
         live_interface.onshutdown = _shutdown(console, logger)
         live_interface.start()
 
@@ -862,9 +874,10 @@ Useful in lambdas where assignment is not allowed.</p></div>
 <h1>Index</h1>
 <div class="toc">
 <ul>
+<li><a href="#before-you-start">Before you start</a></li>
 <li><a href="#quick-example">Quick Example</a></li>
+<li><a href="#less-trivial-example-a-breakdown">Less trivial example, a breakdown</a></li>
 <li><a href="#components-of-livemelee">Components of livemelee</a></li>
-<li><a href="#an-example-step-by-step">An example, step-by-step</a></li>
 <li><a href="#a-deeper-look">A deeper look</a></li>
 <li><a href="#more">More</a></li>
 </ul>

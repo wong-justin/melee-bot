@@ -30,4 +30,16 @@ __all__ = [
 __pdoc__ = {
     'interact': False,
     'startup': False,
+    'livemelee.inputs.release': True,
+    'livemelee.inputs.center': True,
+    'livemelee.inputs.down': True,
+    'livemelee.inputs.up': True,
+    'livemelee.inputs.left': True,
+    'livemelee.inputs.right': True,
+    'livemelee.inputs.A': True,
+    'livemelee.inputs.B': True,
+    'livemelee.inputs.X': True,
+    'livemelee.inputs.Y': True,
+    'livemelee.inputs.L': True,
+    'livemelee.inputs.R': True,
 }

@@ -68,7 +68,7 @@ def wait(n):
     # return [()for _ in range(n)]
 
 def repeat(n, *input_frames):
-    '''Each arg is a frame's worth of  Use * to unpack in sequence.
+    '''Each arg is a frame's worth of inputs. Use * to unpack in sequence.
     >>> inputs = [
     >>>     *repeat(2, (down, B), (un_B,)),
     >>>     *repeat(3, *jump_n_laser),

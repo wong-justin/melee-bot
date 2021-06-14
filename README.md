@@ -67,6 +67,7 @@ ___
 - [ ] make a framework for custom menu nav?
   - [ ] eg. to change from 4 stock to inifinite time (good for training ML)
   - [ ] or eg. move cursor to new stage icon locations in crystal melee iso
+- [ ] use env variables instead of command line paths? would be nice for ipynb notebooks or other situations where command line is not available
 - [ ] Make a semi-playable bot
 - [ ] Sidequest - train a bot with machine learning
   - [ ] gather training dataset of replays
